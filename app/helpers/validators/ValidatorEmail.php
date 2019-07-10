@@ -1,9 +1,7 @@
 <?php
 namespace app\helpers\validators;
-use \app\helpers\validators\ValidatorForm;
 
-class ValidatorEmail extends ValidatorForm {
-
+class ValidatorEmail extends ValidatorChain {
 	public function validate($email) {
 		if (!!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 			return parent::validate($email);

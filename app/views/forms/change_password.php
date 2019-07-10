@@ -1,4 +1,6 @@
 <?php
+/*  @var array $models */
+
 use \app\helpers\builders\FormBuilder;
 echo FormBuilder::buildBeginForm(
     [
@@ -8,4 +10,4 @@ echo FormBuilder::buildBeginForm(
 );
 echo FormBuilder::renderFormContent($models['change']);
 echo FormBuilder::renderFormContent($models['reset']);
-echo FormBuilder::buildBeginForm();
+echo FormBuilder::buildEndForm();

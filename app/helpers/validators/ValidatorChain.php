@@ -1,12 +1,17 @@
 <?php
 namespace app\helpers\validators;
-use \app\helpers\validators\Validator;
 
 abstract class ValidatorChain implements Validator {
 	private $next;
-	private static $error;
+	protected static $errorHandler;
+	protected static $error;
+	protected $name;
 
-	public function setNext($next) {
+	protected function __construct() {
+	    $this->name = (new \ReflectionClass($this))->getShortName();
+    }
+
+    public function setNext($next) {
 		$this->next = $next;
 		return $next;
 	}
@@ -18,17 +23,30 @@ abstract class ValidatorChain implements Validator {
 		return true;
 	}
 
-	public function setError() {
-		self::$error['validator'] = (new \ReflectionClass($this))->getShortName();
-		self::$error['parameters'] = func_get_args();
+	public function setErrorHandler($errorHandler) {
+	    self::$errorHandler = $errorHandler;
+	    return $this;
+    }
+
+    public function getErrorHandler() {
+	    return self::$errorHandler;
+    }
+
+	public function setError($handler = null) {
+	    self::$error = self::$errorHandler->getErrorMessage($this->name);
 		return $this;
 	}
 
 	public function getError() {
-		return self::$error;
+	    return self::$error;
 	}
 
-//	public function getNext() {
-//		return $this->next;
-//	}
+	public static function createChain($head, $links) {
+        $temp = $head;
+
+        foreach ($links as $link) {
+            $temp = $temp->setNext($link);
+        }
+        return $head;
+    }
 }

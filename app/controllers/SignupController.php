@@ -10,23 +10,24 @@ class SignupController extends Controller {
 
 	public function __construct() {
 		parent::__construct();
-		$this->model = new SignupForm(require_once PATH_VIEWS_FORMS_CONFIG.'SignupForm.php');
+		$this->model = new SignupForm();
 	}
 
 	public function actionIndex() {
 		$this->view->run('signup', ['signup' => $this->model]);
 	}
 
-	public function actionRegister() {
+	public function actionSignup() {
 		if (RequestMethods::post('submit'))
 		{
-			$this->model->setAttributes($_POST);
+			$this->model->setInputValues($_POST);
 			if ($this->model->validate()) {
 				$this->model->signup();
-				$this->redirect('/signin');
+				echo 'true';
+				//$this->redirect('/signin');
 			}
 			else {
-				$this->model->handleErrors();
+			    echo "false";
 				$this->actionIndex();
 			}
 		}

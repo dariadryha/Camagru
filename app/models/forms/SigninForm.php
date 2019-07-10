@@ -1,35 +1,55 @@
 <?php
 namespace app\models\forms;
-use app\helpers\validators\ValidatorPasswordVerification as PasswordVerification;
-use \app\helpers\validators\ValidatorRecordExists as RecordExists;
+
 use \app\helpers\validators\ValidatorNotEmpty as NotEmpty;
-use app\models\UserModel;
+use \app\helpers\validators\ValidatorRecordExists as RecordExists;
+use app\helpers\validators\ValidatorPasswordVerification as PasswordVerification;
 
 class SigninForm extends Form {
-
-	protected $username;
-	protected $password;
-
-	public function __construct($config) {
-		parent::__construct();
-		$this->labels = [
-            'username' => 'Username',
-            'password' => 'Password'
-        ];
-		$this->config = $config;
+	public function __construct() {
+		parent::__construct([
+		    'action' => '/signin/signin',
+            'inputs' => [
+                'username' => ($username = new InputField([
+                    'attributes' => [
+                        'name' => 'username',
+                        'type' => 'text',
+                        'id' => 'username'
+                    ],
+                    'validators' => [
+                        new NotEmpty(),
+                        new RecordExists(
+                            'Users',
+                            'username'
+                        )
+                    ],
+                    'label' => 'Username'
+                ])),
+                'password' => new InputField([
+                    'attributes' => [
+                        'type' => 'password',
+                        'id' => 'password',
+                        'autocomplete' => 'off'
+                    ],
+                    'validators' => [
+                        new NotEmpty(),
+                        new PasswordVerification(
+                            'Users',
+                            [
+                                'column' => 'username',
+                                'row' => function () use ($username) {
+                                    return $username->getValue();
+                                }
+                            ]
+                        )
+                    ],
+                    'label' => 'Password'
+                ])
+            ],
+            'submit' => [
+                'type' => 'submit',
+                'value' => "'Sign in'"
+            ]
+        ]);
 	}
-
-	public function getValidationRules() {
-		return [
-			'username' => $this->createChain(new NotEmpty, [new RecordExists('Users', 'username')]),
-			'password' => $this->createChain(new NotEmpty, [new PasswordVerification('Users', 'username', $this->username)])
-		];
-	}
-
-    public function getFieldValues() {
-        return [
-            'username' => $this->username,
-            'password' => $this->password
-        ];
-    }
 }

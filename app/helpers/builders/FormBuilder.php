@@ -24,34 +24,32 @@ class FormBuilder extends HtmlBuilder {
 		return self::buildСlosingTag('form');
 	}
 
-	public static function renderFormContent($model) {
-		$content = '';
-		$config = $model->getConfig();
-		$labels = $model->getLabels();
-		$errors = $model->getErrors();
-		$values = $model->getFieldValues();
-		foreach ($config['elements'] as $name => $attributes) {
-			$block = self::buildLabel(['for' => $name], $labels[$name]);
-			$block .= self::buildUnpairedTag('br');
-			if (!empty($values[$name])) {
-				$attributes['value'] = $values[$name];
-			}
-			$block .= self::buildInput(array_merge($attributes, ['name' => $name]));
-			$block .= self::buildUnpairedTag('br');
-			if (isset($errors[$name])) {
-				$block .= self::buildSpan(['class' => 'error'], $errors[$name]);
-			}
-			$content .= self::buildDiv([], $block);
-		}
-		if (isset($config['submit'])) {
+    public static function renderFormContent($config, $model) {
+	    $content = "";
+	    $inputs = $model->getInputs();
+	   // var_dump($config);
+        foreach ($config['inputs'] as $name => $fieldConfig) {
+            $block = self::buildLabel(['for' => $name], $inputs[$name]->getLabel());
+            $block .= self::buildUnpairedTag('br');
+            $value = $inputs[$name]->getValue();
+            if (!empty($value)) {
+                $fieldConfig['attributes']['value'] = $value;
+            }
+            $block .= self::buildInput($fieldConfig['attributes']);
+            $block .= self::buildUnpairedTag('br');
+            $block .= self::buildPairedTag('span', [], $inputs[$name]->getError());
+            $content .= self::buildDiv([], $block);
+            break ;
+        }
+        if (isset($config['submit'])) {
 			$content .= self::buildDiv([], self::buildInput(array_merge($config['submit'], ['name' => 'submit'])));
 		}
-		return $content;
-	}
+        return $content;
+    }
 
-	public static function renderForm($model, $attributes = ['action' => '#', 'method' => 'post']) {
-		$content = self::renderFormContent($model);
-		$form = self::buildForm($attributes, $content);
+	public static function renderForm($config, $model) {
+		$content = self::renderFormContent($config, $model);
+		$form = self::buildForm(['action' => $model->getAction(), 'method' => $model->getMethod()], $content);
 		return $form;
 	}
 }

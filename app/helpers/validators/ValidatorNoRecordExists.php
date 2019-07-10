@@ -1,14 +1,12 @@
 <?php
 namespace app\helpers\validators;
-use \app\helpers\validators\ValidatorDBData;
-use \app\helpers\validators\ValidatorRecordExists;
 
 class ValidatorNoRecordExists extends ValidatorDBData {
 
 	private $validatorRecordExists;
 
 	public function __construct($table, $column) {
-		parent::__construct();
+	    parent::__construct($table, $column);
 		$this->validatorRecordExists = new ValidatorRecordExists($table, $column);
 	}
 

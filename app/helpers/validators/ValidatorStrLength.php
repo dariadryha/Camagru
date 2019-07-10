@@ -7,6 +7,7 @@ class ValidatorStrLength extends ValidatorChain {
 	private $range;
 
 	public function __construct($min, $max) {
+	    parent::__construct();
 		$this->range = new ValidatorRange($min, $max);
 	}
 
@@ -14,7 +15,7 @@ class ValidatorStrLength extends ValidatorChain {
 		if ($this->range->validate(strlen($value))) {
 			return parent::validate($value);
 		}
-		$this->setError($this->range->getMin(), $this->range->getMax());
+		$this->setError();
 		return false;
 	}
 }

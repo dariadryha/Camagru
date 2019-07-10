@@ -2,10 +2,12 @@
 namespace app\helpers\validators;
 
 class ValidatorPasswordVerification extends ValidatorForm {
-    private $value;
+    private $row;
 
-	public function __construct($table, $column, $value) {
-        $this->value = $value;
+	public function __construct($table, $where) {
+        $this->table = $table;
+        $this->column = $where['column'];
+        $this->row = $where['row'];
 	}
 
 	public function validate($password)
@@ -16,7 +18,7 @@ class ValidatorPasswordVerification extends ValidatorForm {
                 ->buildWhere([$this->column])
                 ->buildSelect($this->table, ['password'])
                 ->getQuery();
-        $hash = $this->db->getRecord($query, [$this->value]);
+        $hash = $this->db->getRecord($query, array($this->row));
         if (password_verify($password, $hash)) {
             return parent::validate($password);
         }

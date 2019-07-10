@@ -1,6 +1,5 @@
 <?php
 namespace app\helpers\validators;
-use \app\helpers\validators\ValidatorChain;
 
 class ValidatorRange extends ValidatorChain {
 	
@@ -8,6 +7,7 @@ class ValidatorRange extends ValidatorChain {
 	private $max;
 
 	public function __construct($min, $max) {
+	    parent::__construct();
 		$this->min = $min;
 		$this->max = $max;
 	}
@@ -16,15 +16,15 @@ class ValidatorRange extends ValidatorChain {
 		if (($value >= $this->min) && ($value <= $this->max)) {
 			return parent::validate($value);
 		}
+		$this->setError();
 		return false;
 	}
 
-	public function getMin() {
-		return $this->min;
-	}
-
-	public function getMax() {
-		return $this->max;
-	}
-
+//	public function getMin() {
+//		return $this->min;
+//	}
+//
+//	public function getMax() {
+//		return $this->max;
+//	}
 }

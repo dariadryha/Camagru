@@ -28,16 +28,19 @@ class UserModel extends Model {
 
 	public function setUsername($username) {
 		$this->username = $username;
+
 		return $this;
 	}
 
 	public function setEmail($email) {
 		$this->email = $email;
+
 		return $this;
 	}
 
 	public function setPassword($password) {
 		$this->password = $this->hashPassword($password);
+
 		return $this;
 	}
 	
