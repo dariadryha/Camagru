@@ -5,8 +5,7 @@ class ValidatorPasswordVerification extends ValidatorForm {
     private $row;
 
 	public function __construct($table, $where) {
-        $this->table = $table;
-        $this->column = $where['column'];
+	    parent::__construct($table, $where['column']);
         $this->row = $where['row'];
 	}
 

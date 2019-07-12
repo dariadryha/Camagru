@@ -1,52 +1,116 @@
 <?php
 namespace app\models\forms;
 
-abstract class Form {
+use app\helpers\ArrayHelper;
+
+/**
+ * Class Form
+ * @package app\models\forms
+ */
+class Form {
+    /** @var string|null $action */
     private $action;
-    private $method = 'post';
+
+    /** @var string $method */
+    private $method;
+
+    /** @var InputField[]|null */
     protected $inputs;
 
-    protected function __construct($config) {
-        $this->action = $config['action'];
-        $this->inputs = $config['inputs'];
+    /** @var bool */
+    private $state = true;
+
+    /**
+     * Form constructor.
+     * @param array $config
+     */
+    protected function __construct(array $config)
+    {
+        //TODO Form model need inheritance
+        $this->action = ArrayHelper::getValue($config, 'action');
+        //TODO check get method property;
+        //$this->method = ArrayHelper::getValue($config, 'method') ?? 'post';
+        $this->method = $config['method'] ?? 'post';
+        $this->inputs = ArrayHelper::getValue($config, 'inputs');
     }
 
-    public function getInputs() {
+    /**
+     * @return InputField[]|null
+     */
+    public function getInputs(): ?array
+    {
         return $this->inputs;
     }
 
-    public function getAction() {
+    /**
+     * @return string|null
+     */
+    public function getAction(): ?string
+    {
         return $this->action;
     }
 
-    public function setInputValues($values) {
+    /**
+     * @param array $values
+     * @return Form
+     */
+    public function setInputValues(array $values): Form
+    {
         foreach ($this->inputs as $name => $input) {
-            $input->setValue($values[$name]);
+            $value = ArrayHelper::getValue($values, $name);
+            $input->setValue($value);
         }
+        return $this;
     }
 
-    public function getMethod() {
+    /**
+     * @return string
+     */
+    public function getMethod(): string
+    {
         return $this->method;
     }
 
-    protected static function getInputPatterns($field) {
+    /**
+     * @param string $name
+     * @return array|null
+     */
+    protected static function getInputPatterns(string $name): ?array
+    {
         $patterns = require PATH_MODELS_FORMS_CONFIG . 'handlers.php';
-        return $patterns[$field];
+        return ArrayHelper::getValue($patterns, $name);
     }
 
-    protected static function getPatternInputErrors($field) {
+    /**
+     * @param string $name
+     * @return array|null
+     */
+    protected static function getPatternInputErrors(string $name): ?array
+    {
         $errors = require PATH_MODELS_FORMS_CONFIG . 'error_messages.php';
-        return $errors[$field];
+        return ArrayHelper::getValue($errors, $name);
     }
 
-    public function validate() {
+    /**
+     * @return bool
+     */
+    public function validate(): bool
+    {
         foreach ($this->inputs as $input) {
-            $input->validate();
+            if ($input->validate())
+                continue ;
+            $this->state = false;
         }
+        return $this->state;
     }
 
-    public function getInputValue($field) {
-        return $this->inputs[$field]->getValue();
+    /**
+     * @param string $name
+     * @return string|null
+     */
+    public function getInputValue(string $name): ?string
+    {
+        return $this->inputs[$name]->getValue();
     }
 }
 

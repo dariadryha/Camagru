@@ -12,7 +12,6 @@ class ValidatorNotEmpty extends ValidatorChain {
 			return parent::validate($value);
 		}
 		$this->setError();
-		//self::$error = self::$errorHandler->getErrorMessage($this->name);
 		return false;
 	}
 }

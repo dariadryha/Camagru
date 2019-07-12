@@ -34,7 +34,7 @@ abstract class ValidatorChain implements Validator {
 
 	public function setError($handler = null) {
 	    self::$error = self::$errorHandler->getErrorMessage($this->name);
-		return $this;
+        return $this;
 	}
 
 	public function getError() {

@@ -1,61 +1,80 @@
 <?php
 namespace app\components;
 
+use \Exception;
+
+/**
+ * Class Router
+ * @package app\components
+ */
 class Router
 {
+    /** @var string $controllerNamespace */
 	private $controllerNamespace = "\app\controllers\\";
-	private static $instance = NULL;
-	private $config;
 
-	private function __construct() {
-		$this->config = require_once PATH_CONFIG.'routes.php'; 
+    /** @var null|Router $instance */
+	private static $instance = null;
+
+    /** @var array $routes */
+	private $routes;
+
+	private function __construct()
+    {
+		$this->routes = require_once PATH_CONFIG.'routes.php';
 	}
 
-	public static function getInstance() {
+    /**
+     * @return Router
+     */
+	public static function getInstance(): Router
+    {
 		if (!isset(self::$instance)) {
 			self::$instance = new self;
 		}
 		return self::$instance;
 	}
 
-	public function getURI() {
-		return trim($_SERVER['REQUEST_URI'], '/');
+    /**
+     * @return string
+     */
+	public function getURI(): string
+    {
+        return trim($_SERVER['REQUEST_URI'], '/');
 	}
 
-	public function applyHandlers($uri) {
-		foreach ($this->config as $pattern => $value) {
-			//echo "/$pattern/";
-			//echo trim($_SERVER['REQUEST_URI'], '/');
-			//echo $uri;
+    /**
+     * @param string $uri
+     * @return string|null
+     */
+	public function getSegments(string $uri): ?string
+    {
+		foreach ($this->routes as $pattern => $value) {
 			if (preg_match("/$pattern/", $uri)) {
 				return preg_replace("/$pattern/", $value, $uri);
 			}
 		}
-		return $this->config['default_controller'];
+		return null;
 	}
 
-	public function run() {
-		$action = 'index';
-
+	public function run()
+    {
 		$uri = $this->getURI();
-		$routes = $this->applyHandlers($uri);
-		$routes = explode('/', $routes);
-		//var_dump($routes);
-		if (!empty($routes[0]))
-			$controllerName = ucfirst($routes[0]);
-		if (!empty($routes[1]))
-			$action = $routes[1];
-		$routes = array_slice($routes, 2);
-		$controllerName = $this->controllerNamespace.$controllerName.'Controller';
+		$segments = $this->getSegments($uri);
+		$segments = explode('/', $segments);
+
+        $controllerName = empty($segments[0]) ? $this->routes['default_controller'] : ucfirst($segments[0]);
+		$action = $segments[1] ?? $this->routes['default_action'];
+		$parameters = array_slice($segments, 2);
+		$controllerName = $this->controllerNamespace . $controllerName . 'Controller';
 		$action = 'action' . ucfirst($action);
 		try {
 			$controller = new $controllerName;
 			if(!is_callable(array($controller, $action)))
 				echo "Error in router action\n";
 			else
-				call_user_func_array([$controller, $action], $routes);
+				call_user_func_array([$controller, $action], $parameters);
 
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			 echo $e->getMessage(), "\n";
 		}
 	}

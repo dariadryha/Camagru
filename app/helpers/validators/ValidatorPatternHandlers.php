@@ -27,7 +27,6 @@ class ValidatorPatternHandlers extends ValidatorChain {
 			if ($this->pattern->validate($value) === false)
 			{
 				$this->setError($handler);
-				//self::$error = self::$error[$handler];
 				return false;
 			}
 		}

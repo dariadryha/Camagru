@@ -37,9 +37,11 @@ class FormBuilder extends HtmlBuilder {
             }
             $block .= self::buildInput($fieldConfig['attributes']);
             $block .= self::buildUnpairedTag('br');
+//            if (is_null($inputs[$name]->getError()))
+//                echo "true";
             $block .= self::buildPairedTag('span', [], $inputs[$name]->getError());
             $content .= self::buildDiv([], $block);
-            break ;
+            //break ;
         }
         if (isset($config['submit'])) {
 			$content .= self::buildDiv([], self::buildInput(array_merge($config['submit'], ['name' => 'submit'])));

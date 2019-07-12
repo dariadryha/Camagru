@@ -1,7 +1,6 @@
 <?php
 namespace app\models\forms;
 
-use app\helpers\handlers\InputErrorHandler;
 use app\models\UserModel;
 use app\helpers\validators\ValidatorEmail as Email;
 use \app\helpers\validators\ValidatorNotEmpty as NotEmpty;
@@ -10,6 +9,10 @@ use \app\helpers\validators\ValidatorStrLength as StrLength;
 use \app\helpers\validators\ValidatorPatternHandlers as PatternHandlers;
 use \app\helpers\validators\ValidatorNoRecordExists as NoRecordExists;
 
+/**
+ * Class SignupForm
+ * @package app\models\forms
+ */
 class SignupForm extends Form
 {
     const USERNAME_MIN_LENGTH = 6;
@@ -18,7 +21,8 @@ class SignupForm extends Form
     const PASSWORD_MIN_LENGTH = 6;
     const PASSWORD_MAX_LENGTH = 12;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct([
             'action' => '/signup/signup',
             'inputs' => [
@@ -32,7 +36,7 @@ class SignupForm extends Form
                         'id' => 'username'
                     ],
                     'validators' => [
-                        new NotEmpty(),
+                        new NotEmpty,
                         new PatternHandlers(
                             self::getInputPatterns('username')
                         ),
@@ -45,58 +49,61 @@ class SignupForm extends Form
                             'username'
                         )
                     ],
-                    'errorHandler' => [
-                        'ValidatorPatternHandlers' => self::getPatternInputErrors('username')
+//                    'errorMessages' => [
+//                        'ValidatorPatternHandlers' => 'username'
+//                    ]
+                ]),
+                'email' => new InputField([
+                    'label' => 'Email',
+                    'attributes' => [
+                        'name' => 'email',
+                        'type' => 'email',
+                        'id' => 'email'
+                    ],
+                    'validators' => [
+                        new NotEmpty,
+                        new Email
+                    ]
+                ]),
+                'password' => ($password = new InputField([
+                    'label' => 'Password',
+                    'attributes' => [
+                        'name' => 'password',
+                        'type' => 'password',
+                        'id' => 'password',
+                        'minlength' => self::PASSWORD_MIN_LENGTH,
+                        'maxlength' => self::PASSWORD_MAX_LENGTH,
+                        'autocomplete' => 'off'
+                    ],
+                    'validators' => [
+                        new NotEmpty(),
+                        new PatternHandlers(
+                            self::getInputPatterns('password')
+                        ),
+                        new StrLength(
+                            self::PASSWORD_MIN_LENGTH,
+                            self::PASSWORD_MAX_LENGTH
+                        )
+                    ],
+                    'errorMessages' => [
+                        'ValidatorPatternHandlers' => self::getPatternInputErrors('password')
+                    ]
+                ])),
+                'confirm_password' => new InputField([
+                    'label' => 'Confirm password',
+                    'attributes' => [
+                        'name' => 'confirm_password',
+                        'type' => 'password',
+                        'id' => 'confirm_password',
+                        'autocomplete' => 'off'
+                    ],
+                    'validators' => [
+                        new NotEmpty(),
+                        new Identical(function () use ($password) {
+                            return $password->getValue();
+                        })
                     ]
                 ])
-//                'email' => new InputField([
-//                    'attributes' => [
-//                        'name' => 'email',
-//                        'type' => 'email',
-//                        'id' => 'email'
-//                    ],
-//                    'validators' => [
-//                        new NotEmpty(),
-//                        new Email
-//                    ],
-//                    'label' => 'Email'
-//                ]),
-//                'password' => ($password = new InputField([
-//                    'attributes' => [
-//                        'name' => 'password',
-//                        'type' => 'password',
-//                        'id' => 'password',
-//                        'minlength' => self::PASSWORD_MIN_LENGTH,
-//                        'maxlength' => self::PASSWORD_MAX_LENGTH,
-//                        'autocomplete' => 'off'
-//                    ],
-//                    'validators' => [
-//                        new NotEmpty(),
-//                        new PatternHandlers(
-//                            self::getFieldPatterns('password')
-//                        ),
-//                        new StrLength(
-//                            self::PASSWORD_MIN_LENGTH,
-//                            self::PASSWORD_MAX_LENGTH
-//                        )
-//                    ],
-//                    'label' => 'Password'
-//                ])),
-//                'confirm_password' => new InputField([
-//                    'attributes' => [
-//                        'name' => 'confirm_password',
-//                        'type' => 'password',
-//                        'id' => 'confirm_password',
-//                        'autocomplete' => 'off'
-//                    ],
-//                    'validators' => [
-//                        new NotEmpty(),
-//                        new Identical(function () use ($password) {
-//                            return $password->getValue();
-//                        })
-//                    ],
-//                    'label' => 'Confirm password'
-//                ])
             ],
             'submit' => [
                 'type' => 'submit',
@@ -105,7 +112,11 @@ class SignupForm extends Form
         ]);
     }
 
-    public function signup() {
+    /**
+     * @return bool
+     */
+    public function signup(): bool
+    {
         $user = new UserModel();
 
         $user

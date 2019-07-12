@@ -1,4 +1,4 @@
-FROM php:7.0-apache
+FROM php:7.1-apache
 
 RUN apt-get update && apt-get install -y ssmtp vim && docker-php-ext-install pdo_mysql
 

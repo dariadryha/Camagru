@@ -1,18 +1,19 @@
 <?php
 namespace app\core;
-use app\core\View;
-use app\core\Model;
-
+/**
+ * Class Controller
+ * @package app\core
+ */
 class Controller
 {
+    /** @var View $view */
 	protected $view;
+
+    //TODO model type;
 	protected $model;
 
-	protected function __construct() {
+	protected function __construct()
+    {
 		$this->view = new View();
-	}
-
-	public function redirect($url) {
-		header("Location:{$url}");
 	}
 }

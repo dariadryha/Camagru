@@ -6,6 +6,7 @@ class ValidatorIdentical extends ValidatorChain {
 	private $token;
 
 	public function __construct($token = null) {
+	    parent::__construct();
 	    $this->setToken($token);
 	}
 

@@ -1,12 +1,25 @@
 <?php
 namespace app\components;
+
 use \app\helpers\builders\MySQLQueryBuilder;
 
-class Database {
-	private static $instance = NULL;
+/**
+ * Class Database
+ * @package app\components
+ */
+class Database
+{
+    /** @var null|Database $instance */
+	private static $instance = null;
 	private $connection;
 
-	private function __construct($database) {
+    /**
+     * Database constructor.
+     * @param array $database
+     */
+	private function __construct(array $database)
+    {
+        //TODO php doc all file
 		try {
 			$this->connection = new \PDO("mysql:host={$database['host']};dbname={$database['dbname']}", $database['user'], $database['password'], $database['options']);
 		} catch (\PDOException $e) {
@@ -14,13 +27,15 @@ class Database {
 		}
 	}
 
-	public function prepare($sql, $values) {
+	public function prepare(string $sql, array $values)
+    {
 		$stmt = $this->connection->prepare($sql);
 		$stmt->execute($values);
 		return $stmt;
 	}
 
-	public function exists($sql, $values) {
+	public function exists($sql, $values)
+    {
 		$stmt = $this->prepare("SELECT EXISTS ($sql)", $values);
 		return !!$stmt->fetchColumn();
 	}
@@ -30,7 +45,8 @@ class Database {
 		return $stmt;
 	}
 
-	public static function load() {
+	public static function load(): Database
+    {
 		if (!isset(self::$instance)) {
 			self::$instance = new self(require_once PATH_CONFIG.'database.php');
 		}

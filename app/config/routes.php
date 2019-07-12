@@ -1,5 +1,4 @@
 <?php
-
 return [
     '^password\/(\w+)\/(\w+)$' => '$1/$2',
     '^password\/(\w+)$' => '$1',
@@ -7,5 +6,6 @@ return [
     '^profile\/(\w+)$' => '$1',
     '^(\w+)\/(\w+)$' => '$1/$2',
     '^(\w+)$' => '$1',
-    'default_controller' => 'signup'
+    'default_controller' => 'signup',
+    'default_action' => 'index'
 ];
