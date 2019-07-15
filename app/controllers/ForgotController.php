@@ -5,15 +5,16 @@ use \app\models\forms\ForgotForm;
 use \app\helpers\RequestMethods;
 use \app\models\UserModel;
 
-class ForgotController extends Controller {
-	protected $form;
-
-	public function __construct() {
+class ForgotController extends Controller
+{
+	public function __construct()
+    {
 		parent::__construct();
-		$this->form = new ForgotForm();
+		$this->model['forgot'] = new ForgotForm();
 	}
 
-	public function actionIndex() {
+	public function actionIndex()
+    {
 		$this->view->run($this->form);
 	}
 }

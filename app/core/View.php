@@ -7,5 +7,4 @@ class View
 	{
 	    require_once PATH_VIEWS_FORMS . $content . '.php';
 	}
-
 }

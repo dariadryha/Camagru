@@ -5,15 +5,26 @@ use \app\models\forms\ResetForm;
 use \app\helpers\RequestMethods;
 use \app\models\UserModel;
 
-class ResetController extends Controller {
-	protected $form;
-
-	public function __construct() {
+class ResetController extends Controller
+{
+	public function __construct()
+    {
 		parent::__construct();
-		$this->form = new ResetForm(require_once PATH_VIEWS_FORMS_CONFIG.'ResetForm.php');
+		$this->model = new ResetForm();
 	}
 
-	public function actionIndex() {
-		$this->view->run('form', 'reset_password', $this->form);
+	public function actionIndex()
+    {
+		$this->view->run('reset_password', ['reset' => $this->model]);
 	}
+
+	public function actionReset()
+    {
+        if ($this->model->validate())
+            echo "true";
+        else {
+            echo "false";
+            $this->actionIndex();
+        }
+    }
 }

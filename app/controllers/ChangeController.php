@@ -8,35 +8,35 @@ use \app\models\forms\ChangePasswordTest;
 use \app\models\forms\ResetForm;
 use \app\helpers\builders\FormBuilder;
 
-class ChangeController extends Controller {
-
-	private $modelChange;
-	private $modelReset;
-
-	public function __construct() {
+class ChangeController extends Controller
+{
+	public function __construct()
+    {
 		parent::__construct();
-		$this->modelChange = new ChangeForm(require_once PATH_VIEWS_FORMS_CONFIG.'ChangeForm.php');
-		$this->modelReset = new ResetForm(require_once PATH_VIEWS_FORMS_CONFIG.'ResetForm.php');
+		$this->model['change'] = new ChangeForm();
+		$this->model['reset'] = new ResetForm();
 	}
 
-	public function actionIndex() {
-		$this->view->run('change_password', [
-		    'change' => $this->modelChange,
-            'reset' => $this->modelReset
-        ]);
+	public function actionIndex()
+    {
+		$this->view->run('change_password', $this->model);
 	}
 
-	public function actionChange() {
+	public function actionChange()
+    {
 	    if (RequestMethods::post('submit')) {
-	        $this->modelChange->setAttributes($_POST);
-            $this->modelReset->setAttributes($_POST);
-            if ($this->modelChange->validate() && $this->modelReset->validate()) {
-                echo "true"
+	        $this->model['change']->setInputValues($_POST);
+            $this->model['reset']->setInputValues($_POST);
+            $this->model['change']->validate();
+            $this->model['reset']->validate();
+            if ($this->model['reset']->getState() and $this->model['change']->getState())
+            {
+                echo "true";
             }
             else {
                 echo "false";
+                $this->actionIndex();
             }
         }
-
     }
 }

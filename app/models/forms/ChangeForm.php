@@ -1,27 +1,39 @@
 <?php
 namespace app\models\forms;
-use \app\models\forms\Form;
+use app\helpers\validators\ValidatorIdentical as Identical;
+use app\helpers\validators\ValidatorNotEmpty as NotEmpty;
+use app\helpers\validators\ValidatorPasswordVerification as PasswordVerification;
+use app\helpers\validators\ValidatorPatternHandlers as PatternHandlers;
+use app\helpers\validators\ValidatorStrLength as StrLength;
 
 class ChangeForm extends Form {
-
-	protected $old_password;
-	protected $new_password;
-	protected $confirm_new_password;
-	protected $labels = [
-		'old_password' => 'Old password',
-		'new_password' => 'New password',
-		'confirm_new_password' => 'Confirm new password'
-	];
-
-	public function __construct() {
-		parent::__construct();
-	}
-
-	public function getValidationRules() {
-		return [
-			'old_password' => $this->createChain(new NotEmpty, ),
-			'new_password' => $this->createChain(new NotEmpty, [new PatternHandlers(self::$patternHandlers['password']), new StrLength(6, 12)]),
-			'confirm_new_password' => $this->createChain(new NotEmpty, [new Identical($this->new_password)])
-		];
-	}
+    public function __construct()
+    {
+        parent::__construct([
+            'action' => '/change/change',
+            'inputs' => [
+                'password' => new InputField([
+                    'label' => 'Old password',
+                    'attributes' => [
+                        'name' => 'old_password',
+                        'type' => 'password',
+                        'id' => 'old_password',
+                        'autocomplete' => 'off'
+                    ],
+                    'validators' => [
+                        new NotEmpty,
+                        new PasswordVerification(
+                            'Users',
+                            [
+                                'column' => 'username',
+                                'value' => 'ddryha'
+                            ]
+                        )
+                    ]
+                ])
+            ],
+            'type' => 'submit',
+            'value' => "'Change password'"
+        ]);
+    }
 }

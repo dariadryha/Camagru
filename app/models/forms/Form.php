@@ -7,18 +7,34 @@ use app\helpers\ArrayHelper;
  * Class Form
  * @package app\models\forms
  */
-class Form {
+class Form
+{
+    //TODO php doc for constant +
+    const USERNAME_MIN_LENGTH = 6;
+    const USERNAME_MAX_LENGTH = 12;
+
+    const PASSWORD_MIN_LENGTH = 6;
+    const PASSWORD_MAX_LENGTH = 12;
+
     /** @var string|null $action */
     private $action;
 
     /** @var string $method */
     private $method;
 
-    /** @var InputField[]|null */
+    /** @var InputField[]|null $inputs */
     protected $inputs;
 
-    /** @var bool */
+    /** @var bool $state */
     private $state = true;
+
+    /** @var array $inputPatterns */
+    private static $inputPatterns;
+
+    /** @var string $type */
+    private $type;
+
+    private $value;
 
     /**
      * Form constructor.
@@ -26,12 +42,12 @@ class Form {
      */
     protected function __construct(array $config)
     {
-        //TODO Form model need inheritance
+        //TODO Form model need inheritance +
         $this->action = ArrayHelper::getValue($config, 'action');
-        //TODO check get method property;
-        //$this->method = ArrayHelper::getValue($config, 'method') ?? 'post';
-        $this->method = $config['method'] ?? 'post';
+        $this->method = ArrayHelper::getValue($config, 'method') ?? 'post';
         $this->inputs = ArrayHelper::getValue($config, 'inputs');
+        $this->type = ArrayHelper::getValue($config, 'type') ?? 'submit';
+        $this->value = ArrayHelper::getValue($config, 'value') ?? 'Submit';
     }
 
     /**
@@ -56,10 +72,13 @@ class Form {
      */
     public function setInputValues(array $values): Form
     {
-        foreach ($this->inputs as $name => $input) {
+        foreach ($this->inputs as $column => $input) {
+            $name = $input->getName();
             $value = ArrayHelper::getValue($values, $name);
-            $input->setValue($value);
+            $input->setValue($value)
+                ->setColumn($column);
         }
+        //echo $this->inputs['username']->getColumn();
         return $this;
     }
 
@@ -75,21 +94,21 @@ class Form {
      * @param string $name
      * @return array|null
      */
-    protected static function getInputPatterns(string $name): ?array
+    protected function getInputPatterns(string $name): ?array
     {
-        $patterns = require PATH_MODELS_FORMS_CONFIG . 'handlers.php';
-        return ArrayHelper::getValue($patterns, $name);
+        self::$inputPatterns = self::$inputPatterns ?? require_once PATH_MODELS_FORMS_CONFIG . 'handlers.php';
+        return ArrayHelper::getValue(self::$inputPatterns, $name);
     }
 
-    /**
-     * @param string $name
-     * @return array|null
-     */
-    protected static function getPatternInputErrors(string $name): ?array
-    {
-        $errors = require PATH_MODELS_FORMS_CONFIG . 'error_messages.php';
-        return ArrayHelper::getValue($errors, $name);
-    }
+//    /**
+//     * @param string $name
+//     * @return array|null
+//     */
+//    protected static function getPatternInputErrors(string $name): ?array
+//    {
+//        $errors = require PATH_MODELS_FORMS_CONFIG . 'error_messages.php';
+//        return ArrayHelper::getValue($errors, $name);
+//    }
 
     /**
      * @return bool
@@ -98,7 +117,7 @@ class Form {
     {
         foreach ($this->inputs as $input) {
             if ($input->validate())
-                continue ;
+                continue;
             $this->state = false;
         }
         return $this->state;
@@ -110,7 +129,43 @@ class Form {
      */
     public function getInputValue(string $name): ?string
     {
+        //$input = ArrayHelper::getValue($this->inputs, $name);
         return $this->inputs[$name]->getValue();
+    }
+
+    /**
+     * @param string $name
+     * @return callable
+     */
+    protected function getClosureInputValue(string $name): callable
+    {
+        return function () use ($name) {
+            return $this->getInputValue($name);
+        };
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getValue(): ?string
+    {
+        return $this->value;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getState(): bool
+    {
+        return $this->state;
     }
 }
 

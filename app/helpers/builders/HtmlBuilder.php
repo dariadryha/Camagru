@@ -33,6 +33,11 @@ class HtmlBuilder {
 	public static function buildSpan($attributes = [], $content = "") {
 		return self::buildPairedTag('span', $attributes, $content);
 	}
+
+	public static function buildBr()
+    {
+        return self::buildUnpairedTag('br');
+    }
 	
 	public static function buildAttributes($attributes) {
 		$config = '';

@@ -29,6 +29,9 @@ class InputField
     /** @var ValidatorChain $validators */
     private $validators;
 
+    /** @var string|null $column */
+    private $column;
+
     /**
      * InputField constructor.
      * @param array $config
@@ -38,13 +41,9 @@ class InputField
         $this->label = ArrayHelper::getValue($config, 'label');
         $this->attributes = ArrayHelper::getValue($config, 'attributes');
         $this->validators = ArrayHelper::getValue($config, 'validators');
-
+        //$this->validators = ValidatorChain::createValidators($this->validators);
         $this->validators = ValidatorChain::createChain($this->validators[0], array_slice($this->validators, 1));
-
-        $errorMessages = ArrayHelper::getValue($config, 'errorMessages');
         $this->errorHandler = new InputErrorHandler($this);
-        if ($errorMessages)
-            $this->errorHandler->addErrorMessages($errorMessages);
     }
 
     /**
@@ -119,5 +118,40 @@ class InputField
     public function getMaxLength(): ?int
     {
         return ArrayHelper::getValue($this->attributes, 'maxlength');
+    }
+
+    /**
+     * @param string $column
+     * @return InputField
+     */
+    public function setColumn(string $column): InputField
+    {
+        $this->column = $column;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getColumn(): ?string
+    {
+        return $this->column;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getName(): ?string
+    {
+        return ArrayHelper::getValue($this->attributes, 'name');
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getAttributes(): ?array
+    {
+        return $this->attributes;
     }
 }

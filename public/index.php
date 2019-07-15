@@ -7,5 +7,9 @@ require_once dirname(__DIR__).'/app/config/bootstrap.php';
 require_once PATH_CONFIG.'autoloader.php';
 
 use \app\components\Router;
+use \app\components\Database;
 
+//Database::load();
 Router::getInstance()->run();
+//TODO check need this close connection
+//Database::closeConnection();

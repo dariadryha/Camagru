@@ -1,6 +1,7 @@
 <?php
 namespace app\helpers\builders;
 use \app\helpers\builders\HtmlBuilder;
+use app\models\forms\InputField;
 
 class FormBuilder extends HtmlBuilder {
 
@@ -20,37 +21,64 @@ class FormBuilder extends HtmlBuilder {
 		return self::buildOpeningTag('form', $attributes);
 	}
 
+//    public static function buildBeginForm($model) {
+//        return self::buildOpeningTag('form', ['action' => $model->getAction(), 'method' => $model->getMethod()]);
+//    }
+
 	public static function buildEndForm() {
 		return self::buildСlosingTag('form');
 	}
 
-    public static function renderFormContent($config, $model) {
-	    $content = "";
-	    $inputs = $model->getInputs();
-	   // var_dump($config);
-        foreach ($config['inputs'] as $name => $fieldConfig) {
-            $block = self::buildLabel(['for' => $name], $inputs[$name]->getLabel());
-            $block .= self::buildUnpairedTag('br');
-            $value = $inputs[$name]->getValue();
-            if (!empty($value)) {
-                $fieldConfig['attributes']['value'] = $value;
-            }
-            $block .= self::buildInput($fieldConfig['attributes']);
-            $block .= self::buildUnpairedTag('br');
-//            if (is_null($inputs[$name]->getError()))
-//                echo "true";
-            $block .= self::buildPairedTag('span', [], $inputs[$name]->getError());
-            $content .= self::buildDiv([], $block);
-            //break ;
+    /**
+     * @param InputField $input
+     * @return string
+     */
+    public static function renderInput(InputField $input): string
+    {
+        $attributes = $input->getAttributes();
+        $value = $input->getValue();
+        if (!empty($value)) {
+            $attributes['value'] = $value;
         }
-        if (isset($config['submit'])) {
-			$content .= self::buildDiv([], self::buildInput(array_merge($config['submit'], ['name' => 'submit'])));
-		}
+        return self::buildInput($attributes);
+    }
+
+    public static function renderBlock(InputField $input): string
+    {
+        $block = self::buildLabel(['for' => $input->getName()], $input->getLabel());
+        $block .= self::buildBr();
+        $block .= self::renderInput($input);
+        $block .= self::buildBr();
+        $error = $input->getError();
+        if (!empty($error)) {
+            $block .= self::buildSpan([], $error);
+        }
+        return self::buildDiv([], $block);
+    }
+
+    public static function renderInputs($model)
+    {
+        $content = "";
+
+        $inputs = $model->getInputs();
+        foreach ($inputs as $input) {
+            $content .= self::renderBlock($input);
+        }
         return $content;
     }
 
-	public static function renderForm($config, $model) {
-		$content = self::renderFormContent($config, $model);
+    public static function renderButton($model)
+    {
+        return self::buildDiv([], self::buildInput([
+            'name' => 'submit',
+            'type' => $model->getType(),
+            'value' => $model->getValue()
+        ]));
+    }
+
+	public static function renderForm($model) {
+		$content = self::renderInputs($model);
+        $content .= self::renderButton($model);
 		$form = self::buildForm(['action' => $model->getAction(), 'method' => $model->getMethod()], $content);
 		return $form;
 	}

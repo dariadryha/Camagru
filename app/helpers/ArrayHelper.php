@@ -19,4 +19,13 @@ class ArrayHelper
         }
         return null;
     }
+
+    /**
+     * @param mixed $value
+     * @return array
+     */
+    public static function getArray($value)
+    {
+        return is_array($value) ? $value : array();
+    }
 }

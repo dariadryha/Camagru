@@ -31,6 +31,7 @@ class Database
     {
 		$stmt = $this->connection->prepare($sql);
 		$stmt->execute($values);
+		//var_dump($stmt);
 		return $stmt;
 	}
 
@@ -60,4 +61,15 @@ class Database
 	public function exec($sql) {
 		$this->connection->exec($sql); 
 	}
+
+	public static function closeConnection()
+    {
+	    self::$instance = null;
+    }
+
+    public function getRecord($sql, $values)
+    {
+	    $stmt = $this->prepare($sql, $values);
+	    return $stmt->fetchColumn();
+    }
 }

@@ -1,16 +1,19 @@
 <?php
 namespace app\helpers\validators;
-use \app\helpers\validators\ValidatorPattern;
-use \app\helpers\validators\ValidatorChain;
 
+/**
+ * Class ValidatorPatternHandlers
+ * @package app\helpers\validators
+ */
 class ValidatorPatternHandlers extends ValidatorChain {
 	
 	private $handlers;
 	private $pattern;
 
-	public function __construct($handlers) {
+	public function __construct($handlers = null)
+    {
 	    parent::__construct();
-		$this->handlers = $handlers;
+	    $this->setHandlers($handlers);
 		$this->pattern = new ValidatorPattern;
 	}
 
@@ -18,10 +21,20 @@ class ValidatorPatternHandlers extends ValidatorChain {
     {
         parent::setError();
         self::$error = self::$error[$handler];
+
         return $this;
     }
 
-    public function validate($value) {
+    public function setHandlers($handlers)
+    {
+        $this->handlers = $handlers;
+
+        return $this;
+    }
+
+    public function validate($value)
+    {
+	    //self::$errorHandler
 		foreach ($this->handlers as $handler => $pattern) {
 			$this->pattern->setPattern($pattern);
 			if ($this->pattern->validate($value) === false)

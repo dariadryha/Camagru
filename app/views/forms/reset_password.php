@@ -1,3 +1,3 @@
 <?php
 use \app\helpers\builders\FormBuilder;
-echo FormBuilder::renderFormContent($model);
+echo FormBuilder::renderForm($models['reset']);

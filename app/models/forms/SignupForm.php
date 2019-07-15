@@ -15,12 +15,6 @@ use \app\helpers\validators\ValidatorNoRecordExists as NoRecordExists;
  */
 class SignupForm extends Form
 {
-    const USERNAME_MIN_LENGTH = 6;
-    const USERNAME_MAX_LENGTH = 12;
-
-    const PASSWORD_MIN_LENGTH = 6;
-    const PASSWORD_MAX_LENGTH = 12;
-
     public function __construct()
     {
         parent::__construct([
@@ -38,7 +32,7 @@ class SignupForm extends Form
                     'validators' => [
                         new NotEmpty,
                         new PatternHandlers(
-                            self::getInputPatterns('username')
+                            $this->getInputPatterns('username')
                         ),
                         new StrLength(
                             self::USERNAME_MIN_LENGTH,
@@ -48,10 +42,7 @@ class SignupForm extends Form
                             'Users',
                             'username'
                         )
-                    ],
-//                    'errorMessages' => [
-//                        'ValidatorPatternHandlers' => 'username'
-//                    ]
+                    ]
                 ]),
                 'email' => new InputField([
                     'label' => 'Email',
@@ -65,7 +56,7 @@ class SignupForm extends Form
                         new Email
                     ]
                 ]),
-                'password' => ($password = new InputField([
+                'password' => new InputField([
                     'label' => 'Password',
                     'attributes' => [
                         'name' => 'password',
@@ -76,19 +67,16 @@ class SignupForm extends Form
                         'autocomplete' => 'off'
                     ],
                     'validators' => [
-                        new NotEmpty(),
+                        new NotEmpty,
                         new PatternHandlers(
-                            self::getInputPatterns('password')
+                            $this->getInputPatterns('password')
                         ),
                         new StrLength(
                             self::PASSWORD_MIN_LENGTH,
                             self::PASSWORD_MAX_LENGTH
                         )
-                    ],
-                    'errorMessages' => [
-                        'ValidatorPatternHandlers' => self::getPatternInputErrors('password')
                     ]
-                ])),
+                ]),
                 'confirm_password' => new InputField([
                     'label' => 'Confirm password',
                     'attributes' => [
@@ -98,17 +86,15 @@ class SignupForm extends Form
                         'autocomplete' => 'off'
                     ],
                     'validators' => [
-                        new NotEmpty(),
-                        new Identical(function () use ($password) {
-                            return $password->getValue();
-                        })
+                        new NotEmpty,
+                        new Identical(
+                            $this->getClosureInputValue('password')
+                        )
                     ]
                 ])
             ],
-            'submit' => [
-                'type' => 'submit',
-                'value' => "'Sign up'"
-            ]
+            'type' => 'submit',
+            'value' => "'Sign up'"
         ]);
     }
 
