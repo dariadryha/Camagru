@@ -1,16 +1,17 @@
 <?php
 namespace app\models\forms;
-use app\helpers\validators\ValidatorIdentical as Identical;
-use app\helpers\validators\ValidatorNotEmpty as NotEmpty;
-use app\helpers\validators\ValidatorPasswordVerification as PasswordVerification;
-use app\helpers\validators\ValidatorPatternHandlers as PatternHandlers;
-use app\helpers\validators\ValidatorStrLength as StrLength;
 
+use app\helpers\validators\ValidatorBase;
+
+/**
+ * Class ChangeForm
+ * @package app\models\forms
+ */
 class ChangeForm extends Form {
     public function __construct()
     {
         parent::__construct([
-            'action' => '/change/change',
+            'action' => '/password/change/change',
             'inputs' => [
                 'password' => new InputField([
                     'label' => 'Old password',
@@ -21,12 +22,16 @@ class ChangeForm extends Form {
                         'autocomplete' => 'off'
                     ],
                     'validators' => [
-                        new NotEmpty,
-                        new PasswordVerification(
-                            'Users',
+                        ValidatorBase::load('notEmpty'),
+                        ValidatorBase::load(
+                            'passwordVerification',
                             [
-                                'column' => 'username',
-                                'value' => 'ddryha'
+                                'Users',
+                                [
+                                    //TODO change value
+                                    'column' => 'username',
+                                    'value' => 'ddryha'
+                                ]
                             ]
                         )
                     ]

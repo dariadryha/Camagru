@@ -1,0 +1,14 @@
+.nopadding {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.error {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: firebrick;
+}
+
+form div:last-child {
+    margin-top: 10px;
+}

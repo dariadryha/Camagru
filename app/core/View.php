@@ -3,8 +3,9 @@ namespace app\core;
 
 class View
 {
-	function run($content, $models)
+	function run($content, $model)
 	{
-	    require_once PATH_VIEWS_FORMS . $content . '.php';
+	    $content = PATH_VIEWS_FORMS . $content . '.php';
+	    require_once PATH_VIEWS . 'layouts/template.php';
 	}
 }

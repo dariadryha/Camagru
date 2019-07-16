@@ -2,7 +2,6 @@
 namespace app\controllers;
 
 use \app\core\Controller;
-use app\helpers\ClassHelper;
 use app\helpers\HeaderHelper;
 use \app\models\forms\SignupForm;
 use \app\helpers\RequestMethods;
@@ -16,8 +15,7 @@ class SignupController extends Controller
 	public function __construct()
     {
 		parent::__construct();
-		//$name = ClassHelper::getControllerName($this);
-		$this->model['signup'] = new SignupForm();
+		$this->model = new SignupForm();
 	}
 
 	public function actionIndex()
@@ -28,16 +26,16 @@ class SignupController extends Controller
 
 	public function actionSignup()
     {
+        //var_dump($_POST);
         //TODO do abstract
-		if (RequestMethods::post('submit')) {
+//		if (RequestMethods::post('submit')) {
             $this->model->setInputValues($_POST);
             //TODO need throw exceptions????
-            if ($this->model->validate()) {
-                $this->model->signup();
+            if ($this->model->validate() and $this->model->signup()) {
                 HeaderHelper::redirect('/signin');
             } else {
                 $this->actionIndex();
             }
-        }
+//        }
 	}
 }

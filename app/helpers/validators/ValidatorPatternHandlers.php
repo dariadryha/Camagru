@@ -5,7 +5,7 @@ namespace app\helpers\validators;
  * Class ValidatorPatternHandlers
  * @package app\helpers\validators
  */
-class ValidatorPatternHandlers extends ValidatorChain {
+class ValidatorPatternHandlers extends ValidatorBase {
 	
 	private $handlers;
 	private $pattern;

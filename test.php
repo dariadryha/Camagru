@@ -25,3 +25,22 @@ $obj->value = 2;
 echo $bar->value;
 //echo $myValue;                // отобразит новое значение $obj->value, то есть 2.
 
+//                        array('validator' => 'notEmpty'),
+//                        array(
+//                            'validator' => 'patternHandlers',
+//                            'parameters' => [$this->getInputPatterns('username')]
+//                        ),
+//                        array(
+//                            'validator' => 'strLength',
+//                            'parameters' => [
+//                                self::USERNAME_MIN_LENGTH,
+//                                self::USERNAME_MAX_LENGTH
+//                            ]
+//                        ),
+//                        array(
+//                            'validator' => 'noRecordExists',
+//                            'parameters' => [
+//                                'Users',
+//                                'username'
+//                            ]
+//                        )

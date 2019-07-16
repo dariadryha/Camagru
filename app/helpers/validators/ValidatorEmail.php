@@ -1,7 +1,7 @@
 <?php
 namespace app\helpers\validators;
 
-class ValidatorEmail extends ValidatorChain {
+class ValidatorEmail extends ValidatorBase {
     public function __construct()
     {
         parent::__construct();

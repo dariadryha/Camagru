@@ -1,28 +1,38 @@
 <?php
 namespace app\helpers\validators;
 
-use app\helpers\ArrayHelper;
 use app\helpers\ClassHelper;
 
-class ValidatorChain implements Validator {
+class ValidatorBase implements Validator {
+
+    /** @var string $validatorNamespace */
     private static $validatorNamespace = '\app\helpers\validators\\';
+
+    /** @var ValidatorBase|null */
 	private $next;
+
 	protected static $errorHandler;
 	protected static $error;
-	protected $name;
+
+    /** @var string $name */
+	private $name;
 
 	protected function __construct()
     {
 	    $this->name = ClassHelper::getShortName($this);
     }
 
-    public function setNext($next)
+    /**
+     * @param ValidatorBase $next
+     * @return ValidatorBase
+     */
+    public function setNext(ValidatorBase $next): ValidatorBase
     {
 		$this->next = $next;
 		return $next;
 	}
 
-	public function validate($value)
+	public function validate($value): bool
     {
 		if ($this->next) {
 			return $this->next->validate($value);
@@ -60,14 +70,14 @@ class ValidatorChain implements Validator {
         return $head;
     }
 
-    public static function createValidators(array $validators)
+    /**
+     * @param string $name
+     * @param array $parameters
+     * @return ValidatorBase
+     */
+    public static function load(string $name, array $parameters = []): ValidatorBase
     {
-	    foreach ($validators as $validator) {
-	        $name = ArrayHelper::getValue($validator, 'validator');
-	        $name = self::$validatorNamespace . 'Validator' . ucfirst($name);
-	        $parameters = ArrayHelper::getValue($validator, 'parameters');
-	        $parameters = ArrayHelper::getArray($parameters);
-	        ClassHelper::createInstance($name, $parameters);
-        }
+        $name = self::$validatorNamespace . 'Validator' . ucfirst($name);
+        return ClassHelper::createInstance($name, $parameters);
     }
 }

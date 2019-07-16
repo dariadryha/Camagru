@@ -1,9 +1,9 @@
 <?php
 namespace app\helpers\validators;
-use \app\helpers\validators\ValidatorChain;
+use \app\helpers\validators\ValidatorBase;
 use app\components\Database;
 
-class ValidatorDBData extends ValidatorChain
+class ValidatorDBData extends ValidatorBase
 {
 	protected $db;
 	protected $table;

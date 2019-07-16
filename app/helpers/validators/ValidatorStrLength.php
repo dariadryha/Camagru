@@ -1,9 +1,9 @@
 <?php
 namespace app\helpers\validators;
 use \app\helpers\validators\ValidatorRange;
-use \app\helpers\validators\ValidatorChain;
+use \app\helpers\validators\ValidatorBase;
 
-class ValidatorStrLength extends ValidatorChain {
+class ValidatorStrLength extends ValidatorBase {
 	private $range;
 
 	public function __construct($min, $max) {

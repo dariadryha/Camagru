@@ -1,7 +1,7 @@
 <?php
 namespace app\helpers\validators;
 
-class ValidatorIdentical extends ValidatorChain {
+class ValidatorIdentical extends ValidatorBase {
 	
 	private $token;
 

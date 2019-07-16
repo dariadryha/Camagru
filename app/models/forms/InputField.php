@@ -3,7 +3,7 @@ namespace app\models\forms;
 
 use app\helpers\ArrayHelper;
 use app\helpers\handlers\InputErrorHandler;
-use app\helpers\validators\ValidatorChain;
+use app\helpers\validators\ValidatorBase;
 
 /**
  * Class InputField
@@ -26,7 +26,7 @@ class InputField
     /** @var InputErrorHandler $errorHandler */
     private $errorHandler;
 
-    /** @var ValidatorChain $validators */
+    /** @var ValidatorBase $validators */
     private $validators;
 
     /** @var string|null $column */
@@ -41,8 +41,7 @@ class InputField
         $this->label = ArrayHelper::getValue($config, 'label');
         $this->attributes = ArrayHelper::getValue($config, 'attributes');
         $this->validators = ArrayHelper::getValue($config, 'validators');
-        //$this->validators = ValidatorChain::createValidators($this->validators);
-        $this->validators = ValidatorChain::createChain($this->validators[0], array_slice($this->validators, 1));
+        $this->validators = ValidatorBase::createChain($this->validators[0], array_slice($this->validators, 1));
         $this->errorHandler = new InputErrorHandler($this);
     }
 

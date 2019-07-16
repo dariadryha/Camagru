@@ -1,25 +1,25 @@
 <?php
 namespace app\helpers\builders;
 
-class HtmlBuilder {
-	protected function __construct() {}
-
-
-	public static function buildUnpairedTag($tag, $attributes = []) {
+class HtmlBuilder
+{
+	public static function buildUnpairedTag(string $tag, array $attributes = []): string
+    {
 		$attributes = !empty($attributes) ? self::buildAttributes($attributes) : "";
 		return "<$tag $attributes>";
 	}
 
-	public static function buildOpeningTag($tag, $attributes = []) {
+	public static function buildOpeningTag($tag, $attributes = [])
+    {
 		return self::buildUnpairedTag($tag, $attributes);
 	}
 
-	public static function buildСlosingTag($tag) {
+	public static function buildClosingTag($tag) {
 		return "</$tag>";
 	}
 
 	public static function buildPairedTag($tag, $attributes = [], $content = "") {
-		return self::buildOpeningTag($tag, $attributes).$content.self::buildСlosingTag($tag);
+		return self::buildOpeningTag($tag, $attributes).$content.self::buildClosingTag($tag);
 	}
 
 	public static function buildDiv($attributes = [], $content = "") {
@@ -33,14 +33,15 @@ class HtmlBuilder {
 	public static function buildSpan($attributes = [], $content = "") {
 		return self::buildPairedTag('span', $attributes, $content);
 	}
-
-	public static function buildBr()
-    {
-        return self::buildUnpairedTag('br');
-    }
+//
+//	public static function buildBr()
+//    {
+//        return self::buildUnpairedTag('br');
+//    }
 	
 	public static function buildAttributes($attributes) {
 		$config = '';
+
 		foreach ($attributes as $attribute => $values) {
 			if (is_array($values))
 				$values = implode(" ", $values);

@@ -1,7 +1,7 @@
 <?php
 namespace app\helpers\validators;
 
-class ValidatorNotEmpty extends ValidatorChain {
+class ValidatorNotEmpty extends ValidatorBase {
 
     public function __construct() {
         parent::__construct();

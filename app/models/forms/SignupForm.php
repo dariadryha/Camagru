@@ -1,13 +1,8 @@
 <?php
 namespace app\models\forms;
 
+use app\helpers\validators\ValidatorBase;
 use app\models\UserModel;
-use app\helpers\validators\ValidatorEmail as Email;
-use \app\helpers\validators\ValidatorNotEmpty as NotEmpty;
-use app\helpers\validators\ValidatorIdentical as Identical;
-use \app\helpers\validators\ValidatorStrLength as StrLength;
-use \app\helpers\validators\ValidatorPatternHandlers as PatternHandlers;
-use \app\helpers\validators\ValidatorNoRecordExists as NoRecordExists;
 
 /**
  * Class SignupForm
@@ -30,17 +25,24 @@ class SignupForm extends Form
                         'id' => 'username'
                     ],
                     'validators' => [
-                        new NotEmpty,
-                        new PatternHandlers(
-                            $this->getInputPatterns('username')
+                        ValidatorBase::load('notEmpty'),
+                        ValidatorBase::load(
+                            'patternHandlers',
+                            [$this->getInputPatterns('username')]
                         ),
-                        new StrLength(
-                            self::USERNAME_MIN_LENGTH,
-                            self::USERNAME_MAX_LENGTH
+                        ValidatorBase::load(
+                            'strLength',
+                            [
+                                self::USERNAME_MIN_LENGTH,
+                                self::USERNAME_MAX_LENGTH
+                            ]
                         ),
-                        new NoRecordExists(
-                            'Users',
-                            'username'
+                        ValidatorBase::load(
+                            'noRecordExists',
+                            [
+                                'Users',
+                                'username'
+                            ]
                         )
                     ]
                 ]),
@@ -52,8 +54,8 @@ class SignupForm extends Form
                         'id' => 'email'
                     ],
                     'validators' => [
-                        new NotEmpty,
-                        new Email
+                        ValidatorBase::load('notEmpty'),
+                        ValidatorBase::load('email')
                     ]
                 ]),
                 'password' => new InputField([
@@ -67,13 +69,17 @@ class SignupForm extends Form
                         'autocomplete' => 'off'
                     ],
                     'validators' => [
-                        new NotEmpty,
-                        new PatternHandlers(
-                            $this->getInputPatterns('password')
+                        ValidatorBase::load('notEmpty'),
+                        ValidatorBase::load(
+                            'patternHandlers',
+                            [$this->getInputPatterns('password')]
                         ),
-                        new StrLength(
-                            self::PASSWORD_MIN_LENGTH,
-                            self::PASSWORD_MAX_LENGTH
+                        ValidatorBase::load(
+                            'strLength',
+                            [
+                                self::PASSWORD_MIN_LENGTH,
+                                self::PASSWORD_MAX_LENGTH
+                            ]
                         )
                     ]
                 ]),
@@ -86,15 +92,16 @@ class SignupForm extends Form
                         'autocomplete' => 'off'
                     ],
                     'validators' => [
-                        new NotEmpty,
-                        new Identical(
-                            $this->getClosureInputValue('password')
+                        ValidatorBase::load('notEmpty'),
+                        ValidatorBase::load(
+                            'identical',
+                            [$this->getClosureInputValue('password')]
                         )
                     ]
                 ])
             ],
             'type' => 'submit',
-            'value' => "'Sign up'"
+            'value' => "Sign up"
         ]);
     }
 

@@ -20,11 +20,14 @@ class ResetController extends Controller
 
 	public function actionReset()
     {
-        if ($this->model->validate())
-            echo "true";
-        else {
-            echo "false";
-            $this->actionIndex();
+        if (RequestMethods::post('submit')) {
+            $this->model->setInputValues($_POST);
+            if ($this->model->validate())
+                echo "true";
+            else {
+                echo "false";
+                $this->actionIndex();
+            }
         }
     }
 }

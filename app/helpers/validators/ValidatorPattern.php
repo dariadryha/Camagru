@@ -1,8 +1,8 @@
 <?php
 namespace app\helpers\validators;
-use \app\helpers\validators\ValidatorChain;
+use \app\helpers\validators\ValidatorBase;
 
-class ValidatorPattern extends ValidatorChain {
+class ValidatorPattern extends ValidatorBase {
 	
 	private $pattern;
 

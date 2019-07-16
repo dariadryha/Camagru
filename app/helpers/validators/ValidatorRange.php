@@ -1,7 +1,7 @@
 <?php
 namespace app\helpers\validators;
 
-class ValidatorRange extends ValidatorChain {
+class ValidatorRange extends ValidatorBase {
 	
 	private $min;
 	private $max;

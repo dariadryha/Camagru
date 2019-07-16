@@ -1,3 +1,2 @@
 <?php
-use \app\helpers\builders\FormBuilder;
-echo FormBuilder::renderForm($models['signup']);
+require PATH_VIEWS . 'form.php';

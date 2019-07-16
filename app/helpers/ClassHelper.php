@@ -34,4 +34,18 @@ class ClassHelper
         $name = str_replace('Controller', '', $name);
         return $name;
     }
+
+    public static function getValidatorPattern($validator, $parameters = [])
+    {
+        return new class($validator, $parameters) {
+            public $validator;
+            public $parameters;
+
+            public function __construct($validator, $parameters)
+            {
+                $this->validator = $validator;
+                $this->parameters = $parameters;
+            }
+        };
+    }
 }

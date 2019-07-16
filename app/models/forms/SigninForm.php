@@ -1,10 +1,12 @@
 <?php
 namespace app\models\forms;
 
-use \app\helpers\validators\ValidatorNotEmpty as NotEmpty;
-use \app\helpers\validators\ValidatorRecordExists as RecordExists;
-use app\helpers\validators\ValidatorPasswordVerification as PasswordVerification;
+use \app\helpers\validators\ValidatorBase;
 
+/**
+ * Class SigninForm
+ * @package app\models\forms
+ */
 class SigninForm extends Form
 {
 	public function __construct()
@@ -20,10 +22,12 @@ class SigninForm extends Form
                         'id' => 'username'
                     ],
                     'validators' => [
-                        new NotEmpty,
-                        new RecordExists(
-                            'Users',
-                            'username'
+                        ValidatorBase::load('notEmpty'),
+                        ValidatorBase::load('recordExists',
+                            [
+                                'Users',
+                                'username'
+                            ]
                         )
                     ]
                 ]),
@@ -36,12 +40,15 @@ class SigninForm extends Form
                         'autocomplete' => 'off'
                     ],
                     'validators' => [
-                        new NotEmpty,
-                        new PasswordVerification(
-                            'Users',
+                        ValidatorBase::load('notEmpty'),
+                        ValidatorBase::load(
+                            'passwordVerification',
                             [
-                                'column' => 'username',
-                                'value' => $this->getClosureInputValue('username')
+                                'Users',
+                                [
+                                    'column' => 'username',
+                                    'value' => $this->getClosureInputValue('username')
+                                ]
                             ]
                         )
                     ]
