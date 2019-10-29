@@ -1,8 +1,10 @@
 <?php
 namespace app\models\forms;
 
-use app\helpers\validators\ValidatorBase;
-use app\models\UserModel;
+use app\models\db_models\AuthModel;
+use app\helpers\Token;
+use app\models\db_models\UserModel;
+use app\traits\EmailSendingTrait;
 
 /**
  * Class SignupForm
@@ -10,112 +12,120 @@ use app\models\UserModel;
  */
 class SignupForm extends Form
 {
+    use EmailSendingTrait
+    {
+        generateLink as private;
+        sendEmail as private;
+    }
+
+    /**
+     * SignupForm constructor.
+     * @throws \ReflectionException
+     */
     public function __construct()
     {
-        parent::__construct([
-            'action' => '/signup/signup',
-            'inputs' => [
-                'username' => new InputField([
-                    'label' => 'Username',
-                    'attributes' => [
-                        'name' => 'username',
-                        'type' => 'text',
-                        'minlength' => self::USERNAME_MIN_LENGTH,
-                        'maxlength' => self::USERNAME_MAX_LENGTH,
-                        'id' => 'username'
-                    ],
-                    'validators' => [
-                        ValidatorBase::load('notEmpty'),
-                        ValidatorBase::load(
+        parent::__construct(
+            [
+                'username' => new InputField(
+                    [
+                        'label' => 'Username',
+                        'attributes' => [
+                            'name' => 'username',
+                            'minlength' => self::INPUT_LENGTH['username']['minlength'],
+                            'maxlength' => self::INPUT_LENGTH['username']['maxlength'],
+                        ],
+                        'validators' => [
+                            'notEmpty',
                             'patternHandlers',
-                            [$this->getInputPatterns('username')]
-                        ),
-                        ValidatorBase::load(
                             'strLength',
-                            [
-                                self::USERNAME_MIN_LENGTH,
-                                self::USERNAME_MAX_LENGTH
-                            ]
-                        ),
-                        ValidatorBase::load(
                             'noRecordExists',
-                            [
-                                'Users',
-                                'username'
-                            ]
-                        )
+                        ]
                     ]
-                ]),
-                'email' => new InputField([
-                    'label' => 'Email',
-                    'attributes' => [
-                        'name' => 'email',
-                        'type' => 'email',
-                        'id' => 'email'
-                    ],
-                    'validators' => [
-                        ValidatorBase::load('notEmpty'),
-                        ValidatorBase::load('email')
+                ),
+                'email' => new InputField(
+                    [
+                        'label' => 'Email',
+                        'attributes' => [
+                            'name' => 'email',
+                        ],
+                        'validators' => [
+                            'notEmpty',
+                            'email',
+                        ]
                     ]
-                ]),
-                'password' => new InputField([
-                    'label' => 'Password',
-                    'attributes' => [
-                        'name' => 'password',
-                        'type' => 'password',
-                        'id' => 'password',
-                        'minlength' => self::PASSWORD_MIN_LENGTH,
-                        'maxlength' => self::PASSWORD_MAX_LENGTH,
-                        'autocomplete' => 'off'
-                    ],
-                    'validators' => [
-                        ValidatorBase::load('notEmpty'),
-                        ValidatorBase::load(
+                ),
+                'password' => new InputField(
+                    [
+                        'label' => 'Password',
+                        'attributes' => [
+                            'name' => 'password',
+                            'minlength' => self::INPUT_LENGTH['password']['minlength'],
+                            'maxlength' => self::INPUT_LENGTH['password']['maxlength'],
+                        ],
+                        'validators' => [
+                            'notEmpty',
                             'patternHandlers',
-                            [$this->getInputPatterns('password')]
-                        ),
-                        ValidatorBase::load(
                             'strLength',
-                            [
-                                self::PASSWORD_MIN_LENGTH,
-                                self::PASSWORD_MAX_LENGTH
-                            ]
-                        )
+                        ]
                     ]
-                ]),
-                'confirm_password' => new InputField([
-                    'label' => 'Confirm password',
-                    'attributes' => [
-                        'name' => 'confirm_password',
-                        'type' => 'password',
-                        'id' => 'confirm_password',
-                        'autocomplete' => 'off'
-                    ],
-                    'validators' => [
-                        ValidatorBase::load('notEmpty'),
-                        ValidatorBase::load(
+                ),
+                'confirm_password' => new InputField(
+                    [
+                        'label' => 'Confirm password',
+                        'attributes' => [
+                            'name' => 'confirm_password',
+                        ],
+                        'validators' => [
+                            'notEmpty',
                             'identical',
-                            [$this->getClosureInputValue('password')]
-                        )
+                        ]
                     ]
-                ])
-            ],
-            'type' => 'submit',
-            'value' => "Sign up"
-        ]);
+                )
+            ]
+        );
     }
 
     /**
      * @return bool
+     * @throws \Exception
      */
     public function signup(): bool
     {
-        $user = new UserModel();
+        $token = Token::generateToken(AuthModel::TOKEN_LENGTH);
 
-        $user
+        $this->user = UserModel::load()
             ->setUsername($this->getInputValue('username'))
             ->setEmail($this->getInputValue('email'))
             ->setPassword($this->getInputValue('password'));
-        return $user->save();
+
+        $auth = AuthModel::load()->setToken($token);
+
+        return $this->user->save()
+                and $auth->save()
+                and $this->sendEmail($this->activateAccountMessage($auth, $token));
+    }
+
+    /**
+     * @param AuthModel $auth
+     * @param string $token
+     * @return array
+     */
+    protected function activateAccountMessage(AuthModel $auth, string $token): array
+    {
+        return [
+            'subject' => 'Complete Sign Up',
+            'body' => 'signup',
+            'user' => $this->user,
+            'additionalParameters' => [
+                'link' => $this->generateLink(
+                    [
+                        'signup',
+                        'activate',
+                        $auth->getUserId(),
+                        $token
+                    ]
+                )
+            ]
+        ];
     }
 }

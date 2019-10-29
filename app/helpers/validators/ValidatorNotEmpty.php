@@ -1,17 +1,33 @@
 <?php
 namespace app\helpers\validators;
 
-class ValidatorNotEmpty extends ValidatorBase {
-
-    public function __construct() {
+/**
+ * Class ValidatorNotEmpty
+ * @package app\helpers\validators
+ */
+class ValidatorNotEmpty extends Validator
+{
+    /**
+     * ValidatorNotEmpty constructor.
+     * @throws \ReflectionException
+     */
+    public function __construct()
+    {
         parent::__construct();
     }
 
-    public function validate($value) {
+    /**
+     * @param mixed $value
+     * @return bool
+     */
+    public function validate($value): bool
+    {
 		if (!empty($value)) {
 			return parent::validate($value);
 		}
-		$this->setError();
+
+		$this->setChainError();
+
 		return false;
 	}
 }

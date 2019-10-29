@@ -1,7 +1,7 @@
 <?php
 namespace app\models\forms;
 
-use \app\helpers\validators\ValidatorBase;
+use app\models\db_models\UserModel;
 
 /**
  * Class SigninForm
@@ -9,53 +9,60 @@ use \app\helpers\validators\ValidatorBase;
  */
 class SigninForm extends Form
 {
+    /**
+     * SigninForm constructor.
+     * @throws \ReflectionException
+     */
 	public function __construct()
     {
-		parent::__construct([
-		    'action' => '/signin/signin',
-            'inputs' => [
-                'username' => new InputField([
-                    'label' => 'Username',
-                    'attributes' => [
-                        'name' => 'username',
-                        'type' => 'text',
-                        'id' => 'username'
-                    ],
-                    'validators' => [
-                        ValidatorBase::load('notEmpty'),
-                        ValidatorBase::load('recordExists',
-                            [
-                                'Users',
-                                'username'
-                            ]
-                        )
+		parent::__construct(
+		    [
+                'username' => new InputField(
+                    [
+                        'label' => 'Username',
+                        'attributes' => [
+                            'name' => 'username',
+                        ],
+                        'validators' => [
+                            'notEmpty',
+                            'recordExists',
+                        ]
                     ]
-                ]),
-                'password' => new InputField([
-                    'label' => 'Password',
-                    'attributes' => [
-                        'name' => 'password',
-                        'type' => 'password',
-                        'id' => 'password',
-                        'autocomplete' => 'off'
-                    ],
-                    'validators' => [
-                        ValidatorBase::load('notEmpty'),
-                        ValidatorBase::load(
-                            'passwordVerification',
-                            [
-                                'Users',
-                                [
-                                    'column' => 'username',
-                                    'value' => $this->getClosureInputValue('username')
-                                ]
-                            ]
-                        )
+                ),
+                'password' => new InputField(
+                    [
+                        'label' => 'Password',
+                        'attributes' => [
+                            'name' => 'password',
+                        ],
+                        'validators' => [
+                            'notEmpty',
+                            'dbHashVerification'
+                        ]
                     ]
-                ])
-            ],
-            'type' => 'submit',
-            'value' => "'Sign in'"
-        ]);
+                )
+            ]
+        );
 	}
+
+    /**
+     * @return bool
+     */
+	public function signin(): bool
+    {
+        $this->user = UserModel::read(
+            [
+                'username' => $this->getInputValue('username'),
+            ],
+            [
+                'activated'
+            ]
+        );
+
+        if ($this->user->getActivated()) {
+            $_SESSION['username'] = $this->getInputValue('username');
+        }
+
+        return $this->user->getActivated();
+    }
 }

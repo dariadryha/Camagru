@@ -1,24 +1,54 @@
 <?php
 namespace app\helpers\validators;
 
-class ValidatorRecordExists extends ValidatorDBData {
+/**
+ * Class ValidatorRecordExists
+ * @package app\helpers\validators
+ */
+class ValidatorRecordExists extends ValidatorDBData
+{
+    /** @var string $column */
+    private $column;
 
-	public function __construct($table, $column) {
-		parent::__construct($table, $column);
-	}
+    /**
+     * ValidatorRecordExists constructor.
+     * @param string $table
+     * @param string $column
+     * @throws \ReflectionException
+     */
+    public function __construct(string $table, string $column)
+    {
+        parent::__construct($table);
 
-	public function validate($value) {
-		$query = $this
-				->db
-				->query()
-				->buildWhere([$this->column])
-				->buildSelect($this->table, [$this->column])
-				->getQuery();
-		if ($this->db->exists($query, array($value))) {
-			return parent::validate($value);
-		}
-		$this->setError();
-		return false;
-	}
+        $this->column = $column;
+    }
 
- }
+    /**
+     * @param mixed $value
+     * @return bool
+     * @throws \ReflectionException
+     */
+    public function validate($value): bool
+    {
+        $this
+            ->db
+            ->query()
+            ->setTable($this->table)
+            ->read(
+                [
+                    $this->column,
+                ],
+                [
+                    $this->column,
+                ]
+            );
+
+        if ($this->db->exists([$value])) {
+            return parent::validate($value);
+        }
+
+        $this->setChainError();
+
+        return false;
+    }
+}

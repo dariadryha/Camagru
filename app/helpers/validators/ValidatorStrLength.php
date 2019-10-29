@@ -1,21 +1,42 @@
 <?php
 namespace app\helpers\validators;
-use \app\helpers\validators\ValidatorRange;
-use \app\helpers\validators\ValidatorBase;
 
-class ValidatorStrLength extends ValidatorBase {
+/**
+ * Class ValidatorStrLength
+ * @package app\helpers\validators
+ */
+class ValidatorStrLength extends Validator
+{
+    /** @var ValidatorRange $range */
 	private $range;
 
-	public function __construct($min, $max) {
+    /**
+     * ValidatorStrLength constructor.
+     * @param int $min
+     * @param int $max
+     * @throws \ReflectionException
+     */
+	public function __construct(int $min, int $max)
+    {
 	    parent::__construct();
+
 		$this->range = new ValidatorRange($min, $max);
 	}
 
-	public function validate($value) {
+    /**
+     * @param mixed $value
+     * @return bool
+     * @throws \ReflectionException
+     */
+	public function validate($value): bool
+    {
 		if ($this->range->validate(strlen($value))) {
 			return parent::validate($value);
 		}
-		$this->setError();
+
+		//$this->initError();
+        $this->setChainError();
+
 		return false;
 	}
 }

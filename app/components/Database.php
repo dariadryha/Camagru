@@ -2,6 +2,7 @@
 namespace app\components;
 
 use \app\helpers\builders\MySQLQueryBuilder;
+use app\helpers\builders\QueryBuilder;
 
 /**
  * Class Database
@@ -11,7 +12,12 @@ class Database
 {
     /** @var null|Database $instance */
 	private static $instance = null;
+
+    /** @var \PDO $connection */
 	private $connection;
+
+    /** @var \PDOStatement $stmt */
+	private $stmt;
 
     /**
      * Database constructor.
@@ -27,38 +33,51 @@ class Database
 		}
 	}
 
-	public function prepare(string $sql, array $values)
+    public function prepare(string $sql, array $values = [])
     {
-		$stmt = $this->connection->prepare($sql);
-		$stmt->execute($values);
-		//var_dump($stmt);
-		return $stmt;
-	}
+        $this->stmt = $this->connection->prepare($sql);
 
-	public function exists($sql, $values)
+        return $this->stmt->execute($values);
+    }
+
+	public function exists($values)
     {
-		$stmt = $this->prepare("SELECT EXISTS ($sql)", $values);
-		return !!$stmt->fetchColumn();
+		$this->prepare("SELECT EXISTS ({$this->query()->getQuery()})", $values);
+
+		return !!$this->stmt->fetchColumn();
 	}
 
-	public function create($sql, $values) {
-		$stmt = $this->prepare($sql, $values);
-		return $stmt;
-	}
+    /**
+     * @param array $values
+     * @return bool
+     */
+	public function timeDiff(array $values): bool
+    {
+        return $this->prepare('SELECT TIMESTAMPDIFF(SECOND, ?, NOW())', $values);
+    }
 
+    /**
+     * @return Database
+     */
 	public static function load(): Database
     {
 		if (!isset(self::$instance)) {
 			self::$instance = new self(require_once PATH_CONFIG.'database.php');
 		}
+
 		return self::$instance;
 	}
 
-	public function query() {
-		return new MySQLQueryBuilder;
-	}
+    /**
+     * @return MySQLQueryBuilder
+     */
+	public function query(): MySQLQueryBuilder
+    {
+        return MySQLQueryBuilder::load();
+    }
 
-	public function exec($sql) {
+	public function exec($sql)
+    {
 		$this->connection->exec($sql); 
 	}
 
@@ -67,9 +86,62 @@ class Database
 	    self::$instance = null;
     }
 
-    public function getRecord($sql, $values)
+    /**
+     * @return mixed
+     */
+    public function getRecord()
     {
-	    $stmt = $this->prepare($sql, $values);
-	    return $stmt->fetchColumn();
+	    return $this->stmt->fetchColumn();
+    }
+
+    public function getLastInsertId()
+    {
+        return $this->connection->lastInsertId();
+    }
+
+    /**
+     * Return result of PDOStatement::execute
+     *
+     * @param array $values
+     * @return bool
+     */
+    public function fulfillQuery(array $values = []): bool
+    {
+        $query = $this
+            ->query()
+            ->getQuery();
+
+
+
+//        echo $query;
+//        exit();
+
+        return $this->prepare($query, $values);
+    }
+
+    /**
+     * @return array
+     */
+    public function asArrays(): array
+    {
+        return $this->stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * @return array|bool
+     */
+    public function asArray()
+    {
+        return $this->stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public function read(string $table, array $select, array $where): bool
+    {
+        $this
+            ->query()
+            ->setTable($table)
+            ->read($select, array_keys($where));
+
+        return $this->fulfillQuery(array_values($where));
     }
 }

@@ -1,46 +1,34 @@
 <?php
-class foo {
-    public $value = 42;
 
-    public function &getValue() {
-        return $this->value;
+class Auto
+{
+    public $a;
+
+    public function setProperty(string $name, $value)
+    {
+        $this->{$name} = $value;
+    }
+
+    public function setUnique($value)
+    {
+        $this->setProperty(static::UNIQUE, $value);
+    }
+
+    public function setPrimary($value)
+    {
+        if (defined('PRIMARY'))
+            $this->setProperty(static::PRIMARY, $value);
+        else
+            echo "mne";
     }
 }
 
-class bar {
-    public $value = 22;
-
-    public function setValue(&$value) {
-        return $this->value = &$value;
-    }
+class Merc extends Auto
+{
+    const UNIQUE = 'a';
 }
 
-$obj = new foo;
-$bar = new bar;
-echo $bar->value;
-$bar->setValue($obj->getValue()); // $myValue указывает на $obj->value, равное 42.
-//$bar->value = &$obj->getValue(); // $myValue указывает на $obj->value, равное 42.
-echo $bar->value;
-$obj->value = 2;
-echo $bar->value;
-//echo $myValue;                // отобразит новое значение $obj->value, то есть 2.
-
-//                        array('validator' => 'notEmpty'),
-//                        array(
-//                            'validator' => 'patternHandlers',
-//                            'parameters' => [$this->getInputPatterns('username')]
-//                        ),
-//                        array(
-//                            'validator' => 'strLength',
-//                            'parameters' => [
-//                                self::USERNAME_MIN_LENGTH,
-//                                self::USERNAME_MAX_LENGTH
-//                            ]
-//                        ),
-//                        array(
-//                            'validator' => 'noRecordExists',
-//                            'parameters' => [
-//                                'Users',
-//                                'username'
-//                            ]
-//                        )
+$test = new Merc();
+$test->setPrimary(10);
+echo $test->a;
+var_dump(get_object_vars($test));

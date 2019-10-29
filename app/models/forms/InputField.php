@@ -2,11 +2,13 @@
 namespace app\models\forms;
 
 use app\helpers\ArrayHelper;
-use app\helpers\handlers\InputErrorHandler;
-use app\helpers\validators\ValidatorBase;
+use app\helpers\validators\Validator;
+use app\helpers\validators\ValidatorInterface;
+use app\helpers\validators\ValidatorInterfaceBase;
+use app\widgets\InputFieldWidget;
 
 /**
- * Class InputField
+ * Class InputFieldWidget
  * @package app\models\forms
  */
 class InputField
@@ -14,26 +16,27 @@ class InputField
     /** @var string|null $label */
     private $label;
 
-    /** @var string|null $value */
-    private $value;
-
-    /** @var array|null $attributes */
+    /** @var array|null */
     private $attributes;
 
     /** @var string|null $error */
     private $error;
 
-    /** @var InputErrorHandler $errorHandler */
-    private $errorHandler;
-
-    /** @var ValidatorBase $validators */
+    /** @var ValidatorInterface[]|null $validators */
     private $validators;
 
-    /** @var string|null $column */
-    private $column;
+    /**
+     * Indicates the need for validation
+     *
+     * @var bool $needValidate
+     */
+    private $needValidate = true;
+
+    /** @var bool $state */
+    private $state = true;
 
     /**
-     * InputField constructor.
+     * InputFieldWidget constructor.
      * @param array $config
      */
     public function __construct(array $config)
@@ -41,8 +44,6 @@ class InputField
         $this->label = ArrayHelper::getValue($config, 'label');
         $this->attributes = ArrayHelper::getValue($config, 'attributes');
         $this->validators = ArrayHelper::getValue($config, 'validators');
-        $this->validators = ValidatorBase::createChain($this->validators[0], array_slice($this->validators, 1));
-        $this->errorHandler = new InputErrorHandler($this);
     }
 
     /**
@@ -51,7 +52,7 @@ class InputField
      */
     public function setValue(string $value = null): InputField
     {
-        $this->value = $value;
+        $this->attributes['value'] = $value;
 
         return $this;
     }
@@ -69,19 +70,15 @@ class InputField
      */
     public function getValue(): ?string
     {
-        return $this->value;
+        return ArrayHelper::getValue($this->attributes, 'value');
     }
 
     /**
-     * @return bool
+     * @return array|null
      */
-    public function validate() {
-        $this->validators->setErrorHandler($this->errorHandler);
-        if ($this->validators->validate($this->value)) {
-            return true;
-        }
-        $this->setError($this->validators->getError());
-        return false;
+    public function getValidators(): ?array
+    {
+        return $this->validators;
     }
 
     /**
@@ -120,25 +117,6 @@ class InputField
     }
 
     /**
-     * @param string $column
-     * @return InputField
-     */
-    public function setColumn(string $column): InputField
-    {
-        $this->column = $column;
-
-        return $this;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getColumn(): ?string
-    {
-        return $this->column;
-    }
-
-    /**
      * @return string|null
      */
     public function getName(): ?string
@@ -152,5 +130,43 @@ class InputField
     public function getAttributes(): ?array
     {
         return $this->attributes;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getState(): bool
+    {
+        return $this->state;
+    }
+
+    /**
+     * @param bool $state
+     * @return InputField
+     */
+    public function setState(bool $state): InputField
+    {
+        $this->state = $state;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $needValidate
+     * @return InputField
+     */
+    public function setNeedValidate(bool $needValidate): InputField
+    {
+        $this->needValidate = $needValidate;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getNeedValidate(): bool
+    {
+        return $this->needValidate;
     }
 }

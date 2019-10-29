@@ -1,22 +1,42 @@
 <?php
 namespace app\helpers\validators;
-use \app\helpers\validators\ValidatorBase;
 use app\components\Database;
 
-class ValidatorDBData extends ValidatorBase
+/**
+ * Class ValidatorDBData
+ * @package app\helpers\validators
+ */
+class ValidatorDBData extends Validator
 {
-	protected $db;
-	protected $table;
-	protected $column;
+    /** @var Database $db */
+    protected $db;
 
-	protected function __construct($table, $column) {
-	    parent::__construct();
-		$this->db = Database::load();
-		$this->table = $table;
-		$this->column = $column;
-	}
-	
-    public function validate($value) {
-    	return parent::validate($value);
+    /** @var string $table */
+    protected $table;
+
+    /**
+     * ValidatorDBData constructor.
+     * @param string $table
+     * @throws \ReflectionException
+     */
+    protected function __construct(string $table)
+    {
+        parent::__construct();
+
+        $this->db = Database::load();
+        $this->table = $table;
+//        $this
+//            ->db
+//            ->query()
+//            ->setTable($table);
+    }
+
+    /**
+     * @param mixed $value
+     * @return bool
+     */
+    public function validate($value): bool
+    {
+        return parent::validate($value);
     }
 }

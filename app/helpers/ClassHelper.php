@@ -22,7 +22,7 @@ class ClassHelper
      * @param array $parameters
      * @return mixed
      */
-    public static function createInstance(string $nameClass, array $parameters)
+    public static function createInstance(string $nameClass, array $parameters = [])
     {
         //TODO mixed
         return new $nameClass(...$parameters);
@@ -33,19 +33,5 @@ class ClassHelper
         $name = self::getShortName($obj);
         $name = str_replace('Controller', '', $name);
         return $name;
-    }
-
-    public static function getValidatorPattern($validator, $parameters = [])
-    {
-        return new class($validator, $parameters) {
-            public $validator;
-            public $parameters;
-
-            public function __construct($validator, $parameters)
-            {
-                $this->validator = $validator;
-                $this->parameters = $parameters;
-            }
-        };
     }
 }

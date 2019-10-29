@@ -1,31 +1,51 @@
 <?php
 namespace app\helpers\validators;
-
-class ValidatorIdentical extends ValidatorBase {
-	
+/**
+ * Class ValidatorIdentical
+ * @package app\helpers\validators
+ */
+class ValidatorIdentical extends Validator
+{
+    /** @var mixed $token */
 	private $token;
 
-	public function __construct($token = null) {
+    /**
+     * ValidatorIdentical constructor.
+     * @param mixed $token
+     * @throws \ReflectionException
+     */
+	public function __construct($token = null)
+    {
 	    parent::__construct();
+
 	    $this->setToken($token);
 	}
 
-	public function setToken($token) {
+    /**
+     * @param mixed $token
+     * @return Validator
+     */
+	public function setToken($token): Validator
+    {
         $this->token = $token;
+
         return $this;
     }
 
-    public function getToken() {
-	    if (is_callable($this->token))
-	        $this->token = ($this->token)();
-	    return $this->token;
-    }
-
-	public function validate($value) {
-		if ($this->getToken() === $value) {
+    /**
+     * @param mixed $value
+     * @return bool
+     * @throws \ReflectionException
+     */
+	public function validate($value): bool
+    {
+		if ($this->token === $value) {
 			return parent::validate($value);
 		}
-		$this->setError();
+
+		//$this->initError();
+        $this->setChainError();
+
 		return false;
 	}
 }

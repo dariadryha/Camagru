@@ -33,19 +33,39 @@ class HtmlBuilder
 	public static function buildSpan($attributes = [], $content = "") {
 		return self::buildPairedTag('span', $attributes, $content);
 	}
-//
-//	public static function buildBr()
-//    {
-//        return self::buildUnpairedTag('br');
-//    }
-	
-	public static function buildAttributes($attributes) {
+
+	public static function buildButton($attributes = [], $content = "")
+    {
+        return self::buildPairedTag('button', $attributes, $content);
+    }
+
+    public static function buildH(int $level, array $attributes = [], string $content = '')
+    {
+        return self::buildPairedTag("h{$level}", $attributes, $content);
+    }
+
+    /**
+     * @param string $content
+     * @param array $attributes
+     * @return string
+     */
+    public static function buildA(string $content = '', array $attributes = []): string
+    {
+        return self::buildPairedTag('a', $attributes, $content);
+    }
+
+    /**
+     * @param array $attributes
+     * @return string
+     */
+	public static function buildAttributes(array $attributes): string
+    {
 		$config = '';
 
 		foreach ($attributes as $attribute => $values) {
 			if (is_array($values))
 				$values = implode(" ", $values);
-			$config .= "$attribute=$values ";
+			$config .= "$attribute='$values' ";
 		}
 		return trim($config);
 	}

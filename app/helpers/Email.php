@@ -1,54 +1,117 @@
 <?php
 namespace app\helpers;
 
-class Email {
-	protected $_to;
-	protected $_from = "noreply@42camagru.zzz.com.ua";
-	protected $_reply;
-	protected $_content;
-	protected $_subject;
-	protected $_body;
+class Email
+{
+    const HTML = 'html';
 
-	 public function sendEmail() {
-	 	mail($this->_to, $this->_subject, $this->_body, $this->buildHeaders());
+    /** @var string $to */
+	private $to;
+
+    /** @var string $from */
+	private $from = "noreply@42camagru.zzz.com.ua";
+
+    /** @var array $reply */
+	private $reply = [];
+
+    /** @var string $content */
+	private $content;
+
+    /** @var string $subject */
+	private $subject;
+
+    /** @var string $body */
+	private $body;
+
+    /**
+     * @return bool
+     */
+	public function sendEmail(): bool
+    {
+         return mail($this->to, $this->subject, $this->body, $this->buildHeaders());
 	}
 
-	protected function buildHeaders() {
-		$headers[] = 'From: ' . $this->_from;
-		if (isset($this->_reply))
-			$headers[] = 'Reply-To: ' . $this->_replay;
-		if ($this->_content === 'html')
-			$headers[] = 'Content-type: text/html; charset=iso-8859-1';
-		return implode("\r\n", $headers);
+    /**
+     * @return string
+     */
+	private function buildHeaders(): string
+    {
+        $headers[] = 'From: ' . $this->from;
+
+		if (empty($this->reply) === false)
+			$headers[] = 'Reply-To: ' . implode(',', $this->reply);
+		//TODO content type
+		$headers[] = 'Content-type: text/html; charset=iso-8859-1';
+
+        return implode("\r\n", $headers);
 	}
 
-	public function setTo($to) {
-		$this->_to = $to;
+    /**
+     * @param string $to
+     * @return Email
+     */
+	public function setTo(string $to): Email
+    {
+		$this->to = $to;
+
 		return $this;
 	}
 
-	public function setFrom($from) {
-		$this->_from = $from;
+    /**
+     * @param string $from
+     * @return Email
+     */
+	public function setFrom(string $from): Email
+    {
+		$this->from = $from;
+
 		return $this;
 	}
 
-	public function setSubject($subject) {
-		$this->_subject = $subject;
+    /**
+     * @param string $subject
+     * @return Email
+     */
+	public function setSubject(string $subject): Email
+    {
+		$this->subject = $subject;
+
 		return $this;
 	}
 
-	public function setBody($body) {
-		$this->_body = $body;
+    /**
+     * @param string $body
+     * @return Email
+     */
+	public function setBody(string $body): Email
+    {
+		$this->body = $body;
+
 		return $this;
 	}
 
-	public function setReply($reply) {
-		$this->_reply = $reply;
+    /**
+     * @param mixed $reply
+     * @return Email
+     */
+	public function setReply($reply): Email
+    {
+		if (is_array($reply))
+		    $this->reply = array_merge($this->reply, $reply);
+		else
+		    $this->reply[] = $reply;
+
 		return $this;
 	}
 
-	public function setContent($content) {
-		$this->_content = $content;
+    /**
+     * @param string $content
+     * @return Email
+     */
+	public function setContent(string $content): Email
+    {
+		$this->content = $content;
+
 		return $this;
 	}
 }

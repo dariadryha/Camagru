@@ -1,27 +1,53 @@
 <?php
 namespace app\helpers\validators;
-use \app\helpers\validators\ValidatorBase;
 
-class ValidatorPattern extends ValidatorBase {
-	
+/**
+ * Class ValidatorPattern
+ * @package app\helpers\validators
+ */
+class ValidatorPattern extends Validator
+{
+    /** @var string $pattern */
 	private $pattern;
 
-	public function __construct($pattern = null) {
+    /**
+     * ValidatorPattern constructor.
+     * @param string|null $pattern
+     * @throws \ReflectionException
+     */
+	public function __construct(string $pattern = null)
+    {
 	    parent::__construct();
+
 		$this->pattern = $pattern;
 	}
 
-	public function validate($value) {
-		if (preg_match($this->pattern, $value) != 1)
-		{
-		    $this->setError();
+    /**
+     * @param mixed $value
+     * @return bool
+     * @throws \ReflectionException
+     */
+	public function validate($value): bool
+    {
+		if (preg_match($this->pattern, $value) != 1) {
+		    //$this->initError();
+
+            $this->setChainError();
+
 			return false;
 		}
+
 		return parent::validate($value);
 	}
 
-	public function setPattern($pattern) {
+    /**
+     * @param string $pattern
+     * @return Validator
+     */
+	public function setPattern(string $pattern): Validator
+    {
 		$this->pattern = $pattern;
+
 		return $this;
 	}
 }

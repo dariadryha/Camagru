@@ -1,9 +1,20 @@
 <?php
-/*  @var array $models */
+use app\models\forms\Form;
+use app\widgets\FormWidget;
+use app\widgets\InputFieldWidget;
 
-use \app\helpers\builders\FormBuilder;
-echo FormBuilder::buildBeginForm(['action' => $models['change']->getAction(), 'method' => $models['change']->getMethod()]);
-echo FormBuilder::renderInputs($models['change']);
-echo FormBuilder::renderInputs($models['reset']);
-echo FormBuilder::renderButton($models['change']);
-echo FormBuilder::buildEndForm();
+/**
+ * @var array $model
+ */
+extract($model);
+/**
+ * @var Form $changePassword
+ * @var Form $resetPassword
+ */
+?>
+<?php $form = FormWidget::begin(['action' => '/change-password/change-password', 'method' => 'post']); ?>
+<?= $form->field($changePassword, 'password')->passwordInput(); ?>
+<?= $form->field($resetPassword, 'password')->passwordInput(); ?>
+<?= $form->field($resetPassword, 'confirm_password')->passwordInput(); ?>
+<?= InputFieldWidget::submitInput(); ?>
+<?php $form->end(); ?>

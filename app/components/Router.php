@@ -56,19 +56,45 @@ class Router
 		return null;
 	}
 
+    /**
+     * @param string $segment
+     * @return string
+     */
+	public function getControllerName(string $segment): string
+    {
+        if (empty($segment))
+            return $this->routes['default_controller'];
+
+        $segmentPieces = array_map('ucfirst', explode('-', $segment));
+
+        return implode('', $segmentPieces);
+    }
+
+    public function getActionName(string $segment)
+    {
+        $segmentPieces = array_map('ucfirst', explode('-', $segment));
+
+        return implode('', $segmentPieces);
+    }
+
 	public function run()
     {
 		$uri = $this->getURI();
 		$segments = $this->getSegments($uri);
 		$segments = explode('/', $segments);
 
-        $controllerName = empty($segments[0]) ? $this->routes['default_controller'] : ucfirst($segments[0]);
+        $controllerName = $this->getControllerName($segments[0]);
+
 		$action = $segments[1] ?? $this->routes['default_action'];
 		$parameters = array_slice($segments, 2);
 		$controllerName = $this->controllerNamespace . $controllerName . 'Controller';
-		$action = 'action' . ucfirst($action);
+		$action = 'action' . $this->getActionName($action);
+           // 'action' . ucfirst($action);
+//		echo $action;
+//		exit();
 		try {
 			$controller = new $controllerName;
+            //$controller = $controllerName;
 			if(!is_callable(array($controller, $action)))
 				echo "Error in router action\n";
 			else

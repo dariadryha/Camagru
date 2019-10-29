@@ -5,44 +5,69 @@ namespace app\helpers\validators;
  * Class ValidatorPatternHandlers
  * @package app\helpers\validators
  */
-class ValidatorPatternHandlers extends ValidatorBase {
-	
+class ValidatorPatternHandlers extends Validator {
+
+    /** @var array $handlers */
 	private $handlers;
+
+    /** @var ValidatorPattern $pattern */
 	private $pattern;
 
-	public function __construct($handlers = null)
+    /**
+     * ValidatorPatternHandlers constructor.
+     * @param array|null $handlers
+     */
+	public function __construct(array $handlers = null)
     {
 	    parent::__construct();
+
 	    $this->setHandlers($handlers);
 		$this->pattern = new ValidatorPattern;
 	}
 
-	public function setError($handler = null)
+    /**
+     * @param string|null $handler
+     * @throws \ReflectionException
+     */
+	public function setChainError(string $handler = null)
     {
-        parent::setError();
-        self::$error = self::$error[$handler];
+        /**
+         * call parent constructor for getting an array of patterns errors
+         */
+        parent::setChainError();
 
-        return $this;
+        self::$chainError = self::$chainError[$handler];
     }
 
-    public function setHandlers($handlers)
+    /**
+     * @param array $handlers
+     * @return Validator
+     */
+    public function setHandlers(array $handlers): Validator
     {
         $this->handlers = $handlers;
 
         return $this;
     }
 
-    public function validate($value)
+    /**
+     * @param mixed $value
+     * @return bool
+     * @throws \ReflectionException
+     */
+    public function validate($value): bool
     {
-	    //self::$errorHandler
 		foreach ($this->handlers as $handler => $pattern) {
+
 			$this->pattern->setPattern($pattern);
+
 			if ($this->pattern->validate($value) === false)
 			{
-				$this->setError($handler);
+				$this->setChainError($handler);
 				return false;
 			}
 		}
+
 		return parent::validate($value);
 	}
 }

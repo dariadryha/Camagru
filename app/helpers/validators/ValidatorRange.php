@@ -1,30 +1,44 @@
 <?php
 namespace app\helpers\validators;
 
-class ValidatorRange extends ValidatorBase {
-	
+/**
+ * Class ValidatorRange
+ * @package app\helpers\validators
+ */
+class ValidatorRange extends Validator
+{
+    /** @var int $min */
 	private $min;
+
+    /** @var int @max */
 	private $max;
 
-	public function __construct($min, $max) {
+    /**
+     * ValidatorRange constructor.
+     * @param int $min
+     * @param int $max
+     * @throws \ReflectionException
+     */
+	public function __construct(int $min, int $max)
+    {
 	    parent::__construct();
+
 		$this->min = $min;
 		$this->max = $max;
 	}
 
-	public function validate($value) {
+    /**
+     * @param int $value
+     * @return bool
+     */
+	public function validate($value): bool
+    {
 		if (($value >= $this->min) && ($value <= $this->max)) {
 			return parent::validate($value);
 		}
-		$this->setError();
+
+		//$this->initError();
+
 		return false;
 	}
-
-//	public function getMin() {
-//		return $this->min;
-//	}
-//
-//	public function getMax() {
-//		return $this->max;
-//	}
 }

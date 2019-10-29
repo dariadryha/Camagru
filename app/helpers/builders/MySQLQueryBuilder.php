@@ -1,82 +1,324 @@
 <?php 
 namespace app\helpers\builders;
-use \app\helpers\builders\SQLQueryBuilder;
-use \app\components\Query;
 
-class MySQLQueryBuilder implements SQLQueryBuilder {
-	protected $query;
-	protected $sql;
+use app\components\Query;
 
-	public function __construct() {
-		$this->query = new Query;
-	}
+class MySQLQueryBuilder implements SQLQueryBuilder
+{
+    /** @var QueryBuilder|null $instance */
+    private static $instance;
 
-	public function getQuery() {
-		return $this->sql;
-	}
+    /** @var Query $query */
+    private $query;
 
-	public function buildWhere($where) {
-		foreach ($where as $key => $clause) {
-			$operator = (isset($this->query->operator[$key])) ? $this->query->operator[$key] : '=';
-			$logic = (isset($this->query->logic[$key])) ? $this->query->logic[$key] : 'AND';
-			$where[$key] = "$clause $operator ?";
-			$where[$key] .= " $logic";
-		}
-		$where = trim(implode(" ", $where), " $logic");
-		$this->query->where = " WHERE $where";
-		return $this;
-	}
+    /**
+     * MySQLQueryBuilder constructor.
+     */
+    private function __construct()
+    {
+        $this->reset();
+    }
 
-	public function buildLimit($start, $offset) {
-		$this->query->limit = " LIMIT $start, $offset";
-		return $this;
-	}
+    /**
+     * Reset query property of SQLQueryBuilder instance
+     */
+    public function reset()
+    {
+        $this->query = new Query();
+    }
 
-	public function buildOrder($order) {
-		foreach ($order as $column => $criterion) {
-			$order[$column] = "$column $criterion";
-		}
-		$this->query->order = " ORDER BY ".implode(", ", $order);
-		return $this;
-	}
+    /**
+     * @return MySQLQueryBuilder
+     */
+    public static function load(): MySQLQueryBuilder
+    {
+        if (!isset(self::$instance)) {
+            self::$instance = new self;
+        }
+        return self::$instance;
+    }
 
-	public function setOperators($operators) {
-		$this->query->operators = $operators;
-		return $this;
-	}
+    /**
+     * @return string
+     */
+    public function getQuery(): string
+    {
+        $parts = array_filter($this->query->getParts());
+        $this->reset();
 
-	public function setLogics($logics) {
-		$this->query->logics = $logics;
-		return $this;
-	}
+        return implode(' ', $parts);
+    }
 
-	public function buildSelect($table, $select) {
-		foreach ($select as $column => $alias) {
-			if (is_int($column))
-				continue ;
-			$select[$column] = "$column AS $alias";
-		}
-		$select = implode(", ", $select);
-		$this->sql = sprintf("SELECT %s FROM %s%s%s%s", $select, $table, $this->query->where, $this->query->order, $this->query->limit);
-		return $this;
-	}
+    /**
+     * @param string $clause
+     * @param string $operator
+     * @return string
+     */
+    public function buildUnnamed(string $clause, string $operator): string
+    {
+        return "$clause $operator ?";
+    }
 
-	public function buildUpdate($table, $set) {
-		$set = array_map(function ($column) {return $column.' = ?'; }, $set);
-		$set = implode(", ", $set);
-		$this->sql = sprintf("UPDATE %s SET %s%s%s%s", $table, $set, $this->query->where, $this->query->order, $this->query->limit);
-		return $this;
-	}
+    /**
+     * @param array $pieces
+     * @return string
+     */
+    public function glue(array $pieces): string
+    {
+        return implode(", ", $pieces);
+    }
 
-	public function buildInsert($table, $into) {
-		$values = implode(", ", array_fill(0, count($into), '?'));
-		$into = implode(", ", $into);
-		$this->sql = sprintf("INSERT INTO %s (%s) VALUES (%s)", $table, $into, $values);
-		return $this;
-	}
+    /**
+     * @param string $table
+     * @return MySQLQueryBuilder
+     */
+    public function setTable(string $table): MySQLQueryBuilder
+    {
+        $this->query->table = $table;
 
-	public function buildDelete($table) {
-		$this->sql = sprintf("DELETE FROM %s%s%s%s", $table, $this->query->where, $this->query->order, $this->query->limit);
-		return $this;
-	}
+        return $this;
+    }
+
+    /**
+     * @param int $limit
+     * @param int|null $offset
+     * @return MySQLQueryBuilder
+     */
+    public function buildLimit(int $limit, int $offset = null): MySQLQueryBuilder
+    {
+        $limitPart = $offset ? "LIMIT {$this->glue([$offset, $limit])}" : "LIMIT {$limit}";
+
+        $this->query->setLimit($limitPart);
+
+        return $this;
+    }
+
+    /**
+     * @return MySQLQueryBuilder
+     */
+    public function order(): MySQLQueryBuilder
+    {
+        $this->query->setOrder('ORDER BY ');
+
+        return $this;
+    }
+
+    /**
+     * @param string $column
+     * @return MySQLQueryBuilder
+     */
+    public function byAsc(string $column): MySQLQueryBuilder
+    {
+        $this->query->setBy("$column ASC");
+
+        return $this;
+    }
+
+
+    /**
+     * @param string $column
+     * @return MySQLQueryBuilder
+     */
+    public function byDesc(string $column): MySQLQueryBuilder
+    {
+        $this->query->setBy("$column DESC");
+
+        return $this;
+    }
+
+    /**
+     * @param array $order
+     * @return MySQLQueryBuilder
+     */
+    public function buildOrder(array $order): MySQLQueryBuilder
+    {
+        foreach ($order as $column => $criterion) {
+            $order[$column] = "$column $criterion";
+        }
+
+        $this->query->setOrder("ORDER BY {$this->glue($order)}");
+
+        return $this;
+    }
+
+    /**
+     * @param array $where
+     * @return MySQLQueryBuilder
+     */
+    public function setWhere(array $where): MySQLQueryBuilder
+    {
+        $this->query->where = $where;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getWhere(): array
+    {
+        return $this->query->where;
+    }
+
+    /**
+     * @param array|null $where
+     * @return MySQLQueryBuilder
+     */
+    public function buildWhere(array $where = null): MySQLQueryBuilder
+    {
+        $where = $where ?? $this->query->where;
+
+        if (!empty($where)) {
+            foreach ($where as $index => $clause) {
+                $where[$index] = $this->buildUnnamed($clause, '=');
+            }
+
+            $this->query->setClause('WHERE ' . implode(' AND ', $where));
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $clause
+     * @param string $operator
+     * @return MySQLQueryBuilder
+     */
+    public function where(string $clause, string $operator = '='): MySQLQueryBuilder
+    {
+        $this->query->setClause("WHERE {$this->buildUnnamed($clause, $operator)}");
+
+        return $this;
+    }
+
+    /**
+     * @param string $clause
+     * @param string $operator
+     * @return MySQLQueryBuilder
+     */
+    public function andWhere(string $clause, string $operator = '='): MySQLQueryBuilder
+    {
+        $this->query->setClause(" AND {$this->buildUnnamed($clause, $operator)}");
+
+        return $this;
+    }
+
+    /**
+     * @param string $clause
+     * @param string $operator
+     * @return MySQLQueryBuilder
+     */
+    public function orWhere(string $clause, string $operator = '='): MySQLQueryBuilder
+    {
+        $this->query->setClause(" OR {$this->buildUnnamed($clause, $operator)}");
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getInto(): array
+    {
+        return $this->query->into;
+    }
+
+    /**
+     * @param array $into
+     * @return MySQLQueryBuilder
+     */
+    public function setInto(array $into): MySQLQueryBuilder
+    {
+        $this->query->into = $into;
+
+        return $this;
+    }
+
+    /**
+     * @param array $select
+     * @return MySQLQueryBuilder
+     */
+    public function buildSelect(array $select = ['*']): MySQLQueryBuilder
+    {
+        foreach ($select as $column => $alias) {
+            if (is_int($column))
+                continue ;
+
+            $select[$column] = "$column AS $alias";
+        }
+        $select = $this->glue($select);
+
+        $this->query->setStatement("SELECT $select FROM {$this->query->table}");
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSet(): array
+    {
+        return $this->query->set;
+    }
+
+    /**
+     * @param array $set
+     * @return MySQLQueryBuilder
+     */
+    public function setSet(array $set): MySQLQueryBuilder
+    {
+        $this->query->set = $set;
+
+        return $this;
+    }
+
+    /**
+     * @return MySQLQueryBuilder
+     */
+    public function buildUpdate(): MySQLQueryBuilder
+    {
+        $set = array_map(function ($column) { return $this->buildUnnamed($column, '='); }, $this->query->set);
+        $set = $this->glue($set);
+
+        $this->query->setStatement("UPDATE {$this->query->table} SET {$set}");
+
+        return $this;
+    }
+
+    /**
+     * @return MySQLQueryBuilder
+     */
+    public function buildInsert(): MySQLQueryBuilder
+    {
+        $values = $this->glue(array_fill(0, count($this->query->into), '?'));
+        $into = $this->glue($this->query->into);
+
+        $this->query->setStatement("INSERT INTO {$this->query->table} ({$into}) VALUES ({$values})");
+
+        return $this;
+    }
+    
+    /**
+     * @return MySQLQueryBuilder
+     */
+    public function buildDelete(): MySQLQueryBuilder
+    {
+        $this->query->setStatement("DELETE FROM {$this->query->table}");
+
+        return $this;
+    }
+
+    /**
+     * @param array $select
+     * @param array $where
+     * @return MySQLQueryBuilder
+     */
+    public function read(array $select, array $where): MySQLQueryBuilder
+    {
+        $this
+            ->buildWhere($where)
+            ->buildSelect($select);
+
+        return $this;
+    }
 }
